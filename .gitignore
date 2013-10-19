@@ -1,0 +1,12 @@
+
+*.pdb 
+vc120.pdb 
+*.exe
+*.obj
+*.idb
+*.pch
+*.swp
+*.dblite
+build
+bin
+lib
