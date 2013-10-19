@@ -29,7 +29,7 @@
 #include <unordered_map>
 #include <memory>
 #include <map>
-#include <cassert>j
+#include <cassert>
 #include <iostream>
 #undef ERROR
 
