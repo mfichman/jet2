@@ -20,29 +20,47 @@
  * IN THE SOFTWARE.
  */
 
-#pragma once
-
 #include "Common.hpp"
 #include "Object.hpp"
-#include "Attr.hpp"
 
-class Database : public std::enable_shared_from_this<Database> {
-// Contains a database of objects for the game, listed by long path name.  In
-// addition, the Database can automatically synchronize with a remote Database.
+enum class DrawBufferType { INDEX, ATTRIBUTE };
+enum class DrawBufferStatus { DIRTY, SYNCED };
+
+class DrawBuffer : public Object {
+// Hardware buffer for storing vertex and index data.  The API is intended to
+// be similar to the API for drawing vertices using glVertex(), except with the
+// ability to use generic attributes.
 public:
-    template <typename T, typename... Arg> 
-    T* create(std::string const& path, Arg...);
+    DrawBuffer(std::string const& name, DrawBufferType type) : Object(name), type(type) {}
 
-    Hash<std::string,Ptr<Object>> object;
+    template <typename T>
+    void val(T arg);
+
+    template <typename T, typename... Arg>
+    void val(T arg, Arg... rest);
+
+    void reload();
+    void load();
+    void unload();
+
+    Const<DrawBufferType> type;
+private:
+    std::vector<char> data;  
 };
+
+template <typename T>
+void DrawBuffer::val(T arg) {
+// Serialize a single value into the hardware buffer for processing by the CPU
+    data.reserve(data.size()+sizeof(arg));
+    auto ptr = &data.back()+1;
+    memcpy(ptr, &arg, sizeof(arg));
+    data.resize(data.size()+sizeof(arg));
+}
 
 template <typename T, typename... Arg>
-T* Database::create(std::string const& path, Arg... arg) {
-    // Creates a new object if it doesn't already exist and returns it 
-    auto ret = object(path);
-    if (!ret) {
-        ret = object(path, std::make_shared<T>(path, arg...));
-    }
-    return static_cast<T*>(ret.get());
-};
+void DrawBuffer::val(T arg, Arg... rest)  {
+// Serialize a bunch of values into the hardware buffer.
+    val(arg);
+    val(rest...); 
+}
 

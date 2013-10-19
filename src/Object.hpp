@@ -26,6 +26,8 @@
 #include <memory>
 #include <string>
 
+
+#undef Ptr
 template <typename T>
 using Ptr = std::shared_ptr<T>;
 
@@ -35,7 +37,6 @@ class Object : public std::enable_shared_from_this<Object> {
 public:
     Object(std::string const& name) : name(name) {}
 
-    typedef Ptr<Object> Ptr;
     Const<std::string> name;
 };
 

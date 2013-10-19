@@ -1,6 +1,5 @@
 
 *.pdb 
-vc120.pdb 
 *.exe
 *.obj
 *.idb

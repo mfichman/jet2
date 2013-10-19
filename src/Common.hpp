@@ -30,6 +30,7 @@
 #include <memory>
 #include <map>
 #include <cassert>
+#include <cstdint>
 #include <iostream>
 #undef ERROR
 
@@ -38,3 +39,5 @@ class Database;
 class Object;
 class Exception;
 class Mesh;
+class DrawBuffer;
+

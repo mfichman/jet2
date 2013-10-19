@@ -21,18 +21,22 @@
  */
 
 #include "Common.hpp"
-#include "Code.hpp"
-#include "Database.hpp"
-#include "Shader.hpp"
-#include "DrawBuffer.hpp"
+#include "Object.hpp"
 
-int main() {
-    auto db = std::make_shared<Database>();
-    auto foo = db->create<Code>("lib/foo");
-    
-    foo->unload();
-    foo->reload();
-    foo->reload();
-    return 0;
-}
+enum class ShaderStatus { LINKED, ERROR };
+enum class ShaderGeom { QUADS, TRIANGLES };
 
+class Shader : public Object {
+// Loads a shader from a file, determines the vertex format, and draws vertices
+// using an index buffer/vertex buffer onto the screen.
+public:
+    Shader(std::string const& name);
+    void reload();
+    void load();
+    void unload();
+    void draw(ShaderGeom geom);
+
+    Attr<ShaderStatus> status; 
+    Attr<Ptr<DrawBuffer>> vertices;
+    Attr<Ptr<DrawBuffer>> indices;
+};
