@@ -29,10 +29,12 @@
 #include <unordered_map>
 #include <memory>
 #include <map>
-#include <cassert>
+#include <cassert>j
 #include <iostream>
 #undef ERROR
 
 class Code;
 class Database;
 class Object;
+class Exception;
+class Mesh;
