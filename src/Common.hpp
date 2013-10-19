@@ -20,9 +20,15 @@
  * IN THE SOFTWARE.
  */
 
+#ifdef _WIN32
 #define VC_EXTRALEAN
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+//#include <Gl/glew.h>
+#include <Gl/gl.h>
+#undef ERROR
+#endif
+
 #include <string>
 #include <functional>
 #include <vector>
@@ -32,7 +38,6 @@
 #include <cassert>
 #include <cstdint>
 #include <iostream>
-#undef ERROR
 
 class Code;
 class Database;
