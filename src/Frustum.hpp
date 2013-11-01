@@ -20,29 +20,20 @@
  * IN THE SOFTWARE.
  */
 
-#pragma once
 
 #include "Common.hpp"
-#include "Object.hpp"
-#include "Attr.hpp"
+#include "Vector.hpp"
 
-class Database : public std::enable_shared_from_this<Database> {
-// Contains a database of objects for the game, listed by long path name.  In
-// addition, the Database can automatically synchronize with a remote Database.
+class Frustum {
 public:
-    template <typename T, typename... Arg> 
-    Ptr<T> create(std::string const& path, Arg...);
-
-    Hash<std::string,Ptr<Object>> object;
-};
-
-template <typename T, typename... Arg>
-Ptr<T> Database::create(std::string const& path, Arg... arg) {
-    // Creates a new object if it doesn't already exist and returns it 
-    auto ret = object(path);
-    if (!ret) {
-        ret = object(path, std::make_shared<T>(path, arg...));
-    }
-    return std::static_pointer_cast<T>(ret);
+    Vector nearTopLeft;
+    Vector nearTopRight;
+    Vector nearBottomLeft;
+    Vector nearBottomRight;
+    
+    Vector farTopLeft;
+    Vector farTopRight;
+    Vector farBottomLeft;
+    Vector farBottomRight;
 };
 

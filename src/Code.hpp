@@ -45,7 +45,7 @@ public:
 
     Attr<CodeStatus> status = CodeStatus::UNLOADED;
 #ifdef _WIN32
-    Attr<HMODULE> handle = 0; 
+    Attr<HMODULE> handle = nullptr; 
 #else
     #error "not implemented"
 #endif

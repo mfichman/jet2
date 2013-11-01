@@ -20,29 +20,44 @@
  * IN THE SOFTWARE.
  */
 
-#pragma once
-
 #include "Common.hpp"
-#include "Object.hpp"
-#include "Attr.hpp"
+#include "DrawBuffer.hpp"
 
-class Database : public std::enable_shared_from_this<Database> {
-// Contains a database of objects for the game, listed by long path name.  In
-// addition, the Database can automatically synchronize with a remote Database.
-public:
-    template <typename T, typename... Arg> 
-    Ptr<T> create(std::string const& path, Arg...);
+DrawBuffer::DrawBuffer(std::string const& name, DrawBufferType type) : 
+    Object(name), 
+    type(type) {
 
-    Hash<std::string,Ptr<Object>> object;
-};
+    auto tmpid = id();
+    glGenBuffers(1, &tmpid);
+    id = tmpid;
+}
 
-template <typename T, typename... Arg>
-Ptr<T> Database::create(std::string const& path, Arg... arg) {
-    // Creates a new object if it doesn't already exist and returns it 
-    auto ret = object(path);
-    if (!ret) {
-        ret = object(path, std::make_shared<T>(path, arg...));
-    }
-    return std::static_pointer_cast<T>(ret);
-};
+DrawBuffer::~DrawBuffer() {
+    auto tmpid = id();
+    glDeleteBuffers(1, &tmpid);    
+}
+
+void DrawBuffer::load() {
+// Loads data into the GPU's memory for processing by a shader.
+    if (status() == DrawBufferStatus::SYNCED) { return; }
+    GLenum target = 0;
+    if (type() == DrawBufferType::ATTRIBUTE) {
+        target = GL_ARRAY_BUFFER;
+    } else if (type() == DrawBufferType::INDEX) {
+        target = GL_ELEMENT_ARRAY_BUFFER;
+    } else {
+        assert(!"invalid draw buffer type");
+    }    
+    status = DrawBufferStatus::SYNCED;
+    glBindBuffer(target, id());
+    glBufferData(target, data.size(), &data.front(), GL_STATIC_DRAW);
+    glBindBuffer(target, 0);
+}
+
+void DrawBuffer::unload() {
+// Mark the buffer as dirty
+    if (status() == DrawBufferStatus::DIRTY) { return; }
+    status = DrawBufferStatus::DIRTY;
+}
+
 

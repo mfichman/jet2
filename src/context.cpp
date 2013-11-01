@@ -20,29 +20,19 @@
  * IN THE SOFTWARE.
  */
 
-#pragma once
-
 #include "Common.hpp"
-#include "Object.hpp"
-#include "Attr.hpp"
+#include "Context.hpp"
+#include "Exception.hpp"
 
-class Database : public std::enable_shared_from_this<Database> {
-// Contains a database of objects for the game, listed by long path name.  In
-// addition, the Database can automatically synchronize with a remote Database.
-public:
-    template <typename T, typename... Arg> 
-    Ptr<T> create(std::string const& path, Arg...);
+Context::Context(std::string const& name) : 
+// Create a new (headless) graphics context for rendering to files.
+    Object(name),
+    context(sf::ContextSettings(8, 0, 0, 3, 0), 800, 600) {
 
-    Hash<std::string,Ptr<Object>> object;
-};
-
-template <typename T, typename... Arg>
-Ptr<T> Database::create(std::string const& path, Arg... arg) {
-    // Creates a new object if it doesn't already exist and returns it 
-    auto ret = object(path);
-    if (!ret) {
-        ret = object(path, std::make_shared<T>(path, arg...));
+    glewExperimental = 1;
+    auto err = glewInit();
+    if (GLEW_OK != err) {
+        throw ResourceException((char const*)glewGetErrorString(err));
     }
-    return std::static_pointer_cast<T>(ret);
-};
+}
 

@@ -23,36 +23,57 @@
 #pragma once
 
 #include "Common.hpp"
+#include "Hash.hpp"
+#include "Array.hpp"
 
 template <typename T>
-class Const {
+class AttrConst {
 // A constant.  Technically, constants don't require an attr accessor like
 // mutable attrs do.  However, for completeness (and to preserve interface
 // consistency) it's included here.
 public:
-    Const(T const& value) : value_(value) {}
+    template <typename... Arg>
+    AttrConst(Arg... arg) : value_(arg...) {}
+
+    AttrConst(T const& value) : value_(value) {}
     T const& operator()() const { return value_; }
 
-private:
+protected:
     T value_;
 };
 
 template <typename T>
 class Attr {
+// A writable attribute.  Provides a setter along with the getter.
+public:
+    template <typename... Arg>
+    Attr(Arg... arg) : value_(arg...) {}
+
+    Attr() {}
+    Attr(T const& value) : value_(value) {} // Creates an attr w/ an initial val
+    T const& operator=(T const& value) { value_ = value; return value; } 
+    T const& operator()(T const& value) { return *this = value; }
+    T const& operator()() const { return value_; }
+    T& operator()() { return value_; }
+
+    T value_;
+};
+
+template <typename T>
+class AttrLive {
 // An attribute that generates events.  An Attr is like a regular C++ class
 // attribute on steroids: it supports events, and has hooks to allow coroutines
 // to wait for the attr to change.  Each attr has a type "T".  Listeners (which
 // are basically functions that take one argument of type "T") are registered
 // using the subscribe() function below, and are one-shot -- that is, they must
 // be reregistered after each event.
-
 public:
     typedef std::function<void (T)> Listener;
     typedef std::vector<Listener> ListenerList;
 
-    Attr() {} // Creates an empty attr
-    Attr(T const& value) : value_(value) {} // Creates an attr w/ an initial val
-    T const& operator=(T const& value); 
+    AttrLive() {} // Creates an empty attr
+    AttrLive(T const& value) : value_(value) {} // Creates an attr w/ an initial val
+    T const& operator=(T const& value);
     T const& operator()(T const& value) { return *this = value; }
     T const& operator()() const { return value_; }
     void subscribe(Listener const& listener) const;
@@ -65,7 +86,7 @@ private:
 };
 
 template <typename T>
-T const& Attr<T>::operator=(T const& value) {
+T const& AttrLive<T>::operator=(T const& value) {
 // Assign a value to the attribute.  When used inside a composite class, this
 // operator provides rather nice syntax for mutation: obj.attr = 10, for
 // example.  If the value set for an attr changes, then an event is created an
@@ -77,7 +98,7 @@ T const& Attr<T>::operator=(T const& value) {
 }
 
 template <typename T>
-void Attr<T>::notify() {
+void AttrLive<T>::notify() {
 // Notify all listeners that the attr has changed; swap the listener vector
 // with an empty one to clear it.
     ListenerList snapshot;
@@ -88,78 +109,7 @@ void Attr<T>::notify() {
 }
 
 template <typename T>
-void Attr<T>::subscribe(Listener const& listener) const {
-// Subscribe for notifications when the attribute changes.  The "listener"
-// function is invoked whenever the attribute is modified.
-    listener_.push_back(listener);
-}
-
-
-template <typename K, typename V>
-class Hash { 
-// A complex attr.  In this case, the attribute is a collection, and it
-// contains multiple values indexed by a key.
-
-public:
-    typedef std::function<void (K)> Listener;
-    typedef std::vector<Listener> ListenerList;
-
-    V const operator()(K const& key) const;
-    V const& operator()(K const& key, V const& value);
-    typename ListenerList::const_iterator begin() const { return listener_.begin(); }
-    typename ListenerList::const_iterator end() const { return listener_.end(); }
-    void clear();
-    void subscribe(Listener const& listener) const;
-
-private:
-    void notify(K const& key);
-
-    std::unordered_map<K,V> value_;
-    mutable ListenerList listener_;
-};
-
-template <typename K, typename V>
-V const Hash<K,V>::operator()(K const& key) const {
-// Returns the value with key "key" from the collection, or a default V value
-// if the element doesn't exist.
-    auto i = value_.find(key);
-    return (i == value_.end()) ? V() : i->second;
-}
-
-template <typename K, typename V>
-V const& Hash<K,V>::operator()(K const& key, V const& value) {
-// Sets the value with key "key" and generates a notification if the value has
-// changed.
-    auto current = value_[key];
-    if (current == value) { return value; }
-    value_[key] = value;
-    notify(key);
-    return value;
-}
-
-template <typename K, typename V>
-void Hash<K,V>::clear() {
-// Clears the entire list, and then generates a notification.
-    std::unordered_map<K,V> snapshot;
-    snapshot.swap(value_);
-    for (auto i = snapshot.begin(); i != snapshot.end(); ++i) {
-        notify(i->first);
-    }
-}
-
-template <typename K, typename V>
-void Hash<K,V>::notify(K const& key) {
-// Notify all listeners that the value has changed; swap the listener vector
-// with an empty one to clear it.
-    ListenerList snapshot;
-    snapshot.swap(listener_);
-    for (auto i = snapshot.begin(); i != snapshot.end(); ++i) {
-        (*i)(key);
-    } 
-}
-
-template <typename K, typename V>
-void Hash<K,V>::subscribe(Listener const& listener) const {
+void AttrLive<T>::subscribe(Listener const& listener) const {
 // Subscribe for notifications when the attribute changes.  The "listener"
 // function is invoked whenever the attribute is modified.
     listener_.push_back(listener);

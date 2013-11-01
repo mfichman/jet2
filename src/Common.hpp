@@ -23,12 +23,17 @@
 #ifdef _WIN32
 #define VC_EXTRALEAN
 #define WIN32_LEAN_AND_MEAN
+#define GLEW_STATIC
 #include <windows.h>
-//#include <Gl/glew.h>
+#include <GL/glew.h>
 #include <Gl/gl.h>
 #undef ERROR
 #endif
 
+#include <SFML/Window.hpp>
+#include <SFML/Audio.hpp>
+#include <SFML/Graphics.hpp>
+#include <fstream>
 #include <string>
 #include <functional>
 #include <vector>
@@ -38,11 +43,15 @@
 #include <cassert>
 #include <cstdint>
 #include <iostream>
+#include <cmath>
 
 class Code;
 class Database;
-class Object;
-class Exception;
-class Mesh;
 class DrawBuffer;
-
+class Exception;
+class Frustum;
+class Object;
+class Mesh;
+class Matrix;
+class Vector;
+class Quaternion;

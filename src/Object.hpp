@@ -37,6 +37,6 @@ class Object : public std::enable_shared_from_this<Object> {
 public:
     Object(std::string const& name) : name(name) {}
 
-    Const<std::string> name;
+    AttrConst<std::string> name;
 };
 

@@ -31,7 +31,10 @@ class DrawBuffer : public Object {
 // be similar to the API for drawing vertices using glVertex(), except with the
 // ability to use generic attributes.
 public:
-    DrawBuffer(std::string const& name, DrawBufferType type) : Object(name), type(type) {}
+    DrawBuffer(std::string const& name, DrawBufferType type);
+    ~DrawBuffer();
+
+    size_t size() const { return data.size(); }
 
     template <typename T>
     void val(T arg);
@@ -39,11 +42,12 @@ public:
     template <typename T, typename... Arg>
     void val(T arg, Arg... rest);
 
-    void reload();
     void load();
     void unload();
 
-    Const<DrawBufferType> type;
+    AttrConst<DrawBufferType> type;
+    Attr<DrawBufferStatus> status = DrawBufferStatus::DIRTY;
+    Attr<GLuint> id = 0;
 private:
     std::vector<char> data;  
 };
@@ -55,6 +59,7 @@ void DrawBuffer::val(T arg) {
     auto ptr = &data.back()+1;
     memcpy(ptr, &arg, sizeof(arg));
     data.resize(data.size()+sizeof(arg));
+    unload();
 }
 
 template <typename T, typename... Arg>

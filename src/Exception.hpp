@@ -31,7 +31,7 @@ public:
         std::cerr << "error: " << message << std::endl;
         assert(!"exception");
     }
-    Const<std::string> message;
+    AttrConst<std::string> message;
 };
 
 class ResourceException : public Exception {

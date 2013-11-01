@@ -24,25 +24,12 @@
 
 #include "Common.hpp"
 #include "Object.hpp"
-#include "Attr.hpp"
 
-class Database : public std::enable_shared_from_this<Database> {
-// Contains a database of objects for the game, listed by long path name.  In
-// addition, the Database can automatically synchronize with a remote Database.
+class Context : public Object {
 public:
-    template <typename T, typename... Arg> 
-    Ptr<T> create(std::string const& path, Arg...);
+    Context(std::string const& name);
+    void snapshot(std::string const& file);
 
-    Hash<std::string,Ptr<Object>> object;
+private:
+    sf::Context context;
 };
-
-template <typename T, typename... Arg>
-Ptr<T> Database::create(std::string const& path, Arg... arg) {
-    // Creates a new object if it doesn't already exist and returns it 
-    auto ret = object(path);
-    if (!ret) {
-        ret = object(path, std::make_shared<T>(path, arg...));
-    }
-    return std::static_pointer_cast<T>(ret);
-};
-

@@ -29,14 +29,17 @@ struct DataStruct {
 public:
     DataStruct() : int_const(1), string_const("foo") {}
 
-    Attr<int> int_attr;
-    Attr<std::string> string_attr;
+    AttrLive<int> int_attr;
+    AttrLive<std::string> string_attr;
 
-    Hash<int,int> int_hash;
-    Hash<std::string,std::string> string_hash;
+    HashLive<int,int> int_hash;
+    HashLive<std::string,std::string> string_hash;
 
-    Const<int> int_const;
-    Const<std::string> string_const;
+    AttrConst<int> int_const;
+    AttrConst<std::string> string_const;
+
+    ArrayLive<int> int_array;
+    ArrayLive<std::string> string_array;
 };
 
 int main() {
@@ -59,13 +62,34 @@ int main() {
     ds.string_hash("foo", "bar");
     assert(ds.string_hash("foo")=="bar");
 
+    ds.int_array.subscribe([&](int32_t key) { assert(key==0); ++events; });
+    ds.int_array.push(1);
+    ds.int_array.subscribe([&](int32_t key) { assert(key==1); ++events; });
+    ds.int_array(1, 2);
+    assert(ds.int_array(0)==1);
+    assert(ds.int_array(1)==2);
+
+    ds.string_array.subscribe([&](int32_t key) { assert(key==0); ++events; });
+    ds.string_array.push("1");
+    ds.string_array.subscribe([&](int32_t key) { assert(key==1); ++events; });
+    ds.string_array(1, "2");
+    assert(ds.string_array(0)=="1");
+    assert(ds.string_array(1)=="2");
+
     assert(ds.int_const()==1);
     assert(ds.string_const()=="foo");
 
-    assert(events==4);
+    assert(events==8);
 
     for (auto elem : ds.string_hash) {
     }
+
+    ds.int_hash.clear();
+    ds.int_array.clear();
+    assert(ds.int_hash.size()==0);
+    assert(ds.int_array.size()==0);
+
+    ArrayConst<int> x = { 1, 2, 3 };
 
     return 0;
 }

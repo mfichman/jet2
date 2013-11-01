@@ -20,29 +20,36 @@
  * IN THE SOFTWARE.
  */
 
-#pragma once
-
 #include "Common.hpp"
-#include "Object.hpp"
-#include "Attr.hpp"
+#include "Functions.hpp"
+#include "Exception.hpp"
 
-class Database : public std::enable_shared_from_this<Database> {
-// Contains a database of objects for the game, listed by long path name.  In
-// addition, the Database can automatically synchronize with a remote Database.
-public:
-    template <typename T, typename... Arg> 
-    Ptr<T> create(std::string const& path, Arg...);
-
-    Hash<std::string,Ptr<Object>> object;
-};
-
-template <typename T, typename... Arg>
-Ptr<T> Database::create(std::string const& path, Arg... arg) {
-    // Creates a new object if it doesn't already exist and returns it 
-    auto ret = object(path);
-    if (!ret) {
-        ret = object(path, std::make_shared<T>(path, arg...));
+std::string read_file(std::string const& path) {
+// Read the whole file into a single string.  If the file can't be read, throw
+// an exception.
+    std::string ret;
+    std::ifstream fd(path.c_str());
+    if (fd.fail()) {
+        throw ResourceException("couldn't read "+path);
     }
-    return std::static_pointer_cast<T>(ret);
-};
+    fd.seekg(0, std::ios::end);
+    ret.resize((size_t)fd.tellg()+1);
+    fd.seekg(0, std::ios::beg);
+    fd.read(&ret.front(), ret.size());
+    return ret;
+}
+
+void screen_snapshot(std::string const& file) {
+// Write the context to a file
+    GLint ret[4];
+    glGetIntegerv(GL_VIEWPORT, ret);
+    GLuint const width = ret[2];
+    GLuint const height = ret[3];
+    std::vector<GLuint> data(width*height);
+    glReadPixels(0, 0, width, height, GL_RGBA, GL_UNSIGNED_BYTE, &data.front());
+
+    sf::Image image;
+    image.create(width, height, (uint8_t const*)&data.front());
+    image.saveToFile(file);
+}
 
