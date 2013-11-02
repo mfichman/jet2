@@ -20,9 +20,11 @@
  * IN THE SOFTWARE.
  */
 
-#include "Common.hpp"
+#include "jet2/Common.hpp"
 
 #pragma once
+
+namespace jet2 {
 
 template <typename K, typename V>
 class HashConst {
@@ -118,4 +120,4 @@ void HashLive<K,V>::subscribe(Listener const& listener) const {
     listener_.push_back(listener);
 }
 
-
+}

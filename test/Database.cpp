@@ -20,8 +20,10 @@
  * IN THE SOFTWARE.
  */
 
-#include "Common.hpp"
-#include "Database.hpp"
+#include "jet2/Common.hpp"
+#include "jet2/Database.hpp"
+
+using namespace jet2;
 
 class DataStruct : public Object {
 public:

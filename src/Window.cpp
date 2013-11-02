@@ -20,9 +20,11 @@
  * IN THE SOFTWARE.
  */
 
-#include "Common.hpp"
-#include "Window.hpp"
-#include "Exception.hpp"
+#include "jet2/Common.hpp"
+#include "jet2/Window.hpp"
+#include "jet2/Exception.hpp"
+
+namespace jet2 {
 
 Window::Window(std::string const& name) : 
     Object(name), 
@@ -36,5 +38,7 @@ Window::Window(std::string const& name) :
 }
 
 Window::~Window() {
+
+}
 
 }

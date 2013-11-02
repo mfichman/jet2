@@ -19,10 +19,11 @@ class Jet2(pkgboot.Package):
     patch = '0'
 
     def build(self):
+        self.env.VariantDir('build/code', 'code', duplicate=0)
         for code in self.env.Glob('build/code/**.cpp'):
-            self.env.Depends(code, pch)
+            self.env.Depends(code, self.pch)
             name = code.name.replace('.cpp', '')
-            lib = self.env.SharedLibrary('lib/%s' % name, (code, jet2))
+            lib = self.env.SharedLibrary('lib/%s' % name, (code, self.lib))
 
 
 Jet2()

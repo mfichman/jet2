@@ -20,10 +20,12 @@
  * IN THE SOFTWARE.
  */
 
-#include "Common.hpp"
-#include "Attr.hpp"
+#include "jet2/Common.hpp"
+#include "jet2/Attr.hpp"
 #include <iostream>
 #include <cassert>
+
+using namespace jet2;
 
 struct DataStruct {
 public:

@@ -20,9 +20,11 @@
  * IN THE SOFTWARE.
  */
 
-#include "Common.hpp"
-#include "Functions.hpp"
-#include "Exception.hpp"
+#include "jet2/Common.hpp"
+#include "jet2/Functions.hpp"
+#include "jet2/Exception.hpp"
+
+namespace jet2 {
 
 std::string read_file(std::string const& path) {
 // Read the whole file into a single string.  If the file can't be read, throw
@@ -53,3 +55,4 @@ void screen_snapshot(std::string const& file) {
     image.saveToFile(file);
 }
 
+}

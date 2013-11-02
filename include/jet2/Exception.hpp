@@ -22,7 +22,23 @@
 
 #pragma once
 
-#include "Common.hpp"
+#include "jet2/Common.hpp"
+#include "jet2/Object.hpp"
 
-std::string read_file(std::string const& path);
-void screen_snapshot(std::string const& file);
+namespace jet2 {
+
+class Exception {
+public:
+    Exception(std::string const& message) : message(message) {
+        std::cerr << "error: " << message << std::endl;
+        assert(!"exception");
+    }
+    AttrConst<std::string> message;
+};
+
+class ResourceException : public Exception {
+public:
+    ResourceException(std::string const& message) : Exception(message) {}
+};
+
+}

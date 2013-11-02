@@ -22,21 +22,18 @@
 
 #pragma once
 
-#include "Attr.hpp"
-#include <memory>
-#include <string>
+#include "jet2/Common.hpp"
+#include "jet2/Object.hpp"
 
+namespace jet2 {
 
-#undef Ptr
-template <typename T>
-using Ptr = std::shared_ptr<T>;
-
-class Object : public std::enable_shared_from_this<Object> {
-// A game object or resource.  Objects are identified by their long path name,
-// so that clients can look them up.
+class Context : public Object {
 public:
-    Object(std::string const& name) : name(name) {}
+    Context(std::string const& name);
+    void snapshot(std::string const& file);
 
-    AttrConst<std::string> name;
+private:
+    sf::Context context;
 };
 
+}

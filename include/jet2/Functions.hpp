@@ -20,20 +20,13 @@
  * IN THE SOFTWARE.
  */
 
+#pragma once
 
-#include "Common.hpp"
-#include "Vector.hpp"
+#include "jet2/Common.hpp"
 
-class Frustum {
-public:
-    Vector nearTopLeft;
-    Vector nearTopRight;
-    Vector nearBottomLeft;
-    Vector nearBottomRight;
-    
-    Vector farTopLeft;
-    Vector farTopRight;
-    Vector farBottomLeft;
-    Vector farBottomRight;
-};
+namespace jet2 {
 
+std::string read_file(std::string const& path);
+void screen_snapshot(std::string const& file);
+
+}

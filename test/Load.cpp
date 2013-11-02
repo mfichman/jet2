@@ -20,11 +20,11 @@
  * IN THE SOFTWARE.
  */
 
-#include "Common.hpp"
-#include "Code.hpp"
-#include "Database.hpp"
-#include "Shader.hpp"
-#include "DrawBuffer.hpp"
+#include "jet2/Common.hpp"
+#include "jet2/Code.hpp"
+#include "jet2/Database.hpp"
+
+using namespace jet2;
 
 int main() {
     auto db = std::make_shared<Database>();

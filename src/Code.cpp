@@ -20,9 +20,11 @@
  * IN THE SOFTWARE.
  */
 
-#include "Common.hpp" // PCH
-#include "Code.hpp"
-#include "Exception.hpp"
+#include "jet2/Common.hpp" // PCH
+#include "jet2/Code.hpp"
+#include "jet2/Exception.hpp"
+
+namespace jet2 {
 
 Code::Code(std::string const& name) : Object(name) {
 // Create a new code object and load it from the dll/so
@@ -80,3 +82,4 @@ void Code::unload() {
     status = CodeStatus::UNLOADED;
 }
 
+}

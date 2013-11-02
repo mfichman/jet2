@@ -20,9 +20,11 @@
  * IN THE SOFTWARE.
  */
 
-#include "Common.hpp"
-#include "Context.hpp"
-#include "Exception.hpp"
+#include "jet2/Common.hpp"
+#include "jet2/Context.hpp"
+#include "jet2/Exception.hpp"
+
+namespace jet2 {
 
 Context::Context(std::string const& name) : 
 // Create a new (headless) graphics context for rendering to files.
@@ -34,5 +36,6 @@ Context::Context(std::string const& name) :
     if (GLEW_OK != err) {
         throw ResourceException((char const*)glewGetErrorString(err));
     }
+}
 }
 

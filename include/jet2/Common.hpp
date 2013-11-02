@@ -20,29 +20,40 @@
  * IN THE SOFTWARE.
  */
 
-#pragma once
+#ifdef _WIN32
+#define VC_EXTRALEAN
+#define WIN32_LEAN_AND_MEAN
+#define GLEW_STATIC
+#include <windows.h>
+#include <GL/glew.h>
+#include <Gl/gl.h>
+#undef ERROR
+#endif
 
-#include "Common.hpp"
-#include "Object.hpp"
-#include "Attr.hpp"
+#include <SFML/Window.hpp>
+#include <SFML/Audio.hpp>
+#include <SFML/Graphics.hpp>
+#include <fstream>
+#include <string>
+#include <functional>
+#include <vector>
+#include <unordered_map>
+#include <memory>
+#include <map>
+#include <cassert>
+#include <cstdint>
+#include <iostream>
+#include <cmath>
 
-class Database : public std::enable_shared_from_this<Database> {
-// Contains a database of objects for the game, listed by long path name.  In
-// addition, the Database can automatically synchronize with a remote Database.
-public:
-    template <typename T, typename... Arg> 
-    Ptr<T> create(std::string const& path, Arg...);
-
-    Hash<std::string,Ptr<Object>> object;
-};
-
-template <typename T, typename... Arg>
-Ptr<T> Database::create(std::string const& path, Arg... arg) {
-    // Creates a new object if it doesn't already exist and returns it 
-    auto ret = object(path);
-    if (!ret) {
-        ret = object(path, std::make_shared<T>(path, arg...));
-    }
-    return std::static_pointer_cast<T>(ret);
-};
-
+namespace jet2 {
+class Code;
+class Database;
+class DrawBuffer;
+class Exception;
+class Frustum;
+class Object;
+class Mesh;
+class Matrix;
+class Vector;
+class Quaternion;
+}

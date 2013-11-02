@@ -20,9 +20,11 @@
  * IN THE SOFTWARE.
  */
 
-#include "Common.hpp"
+#include "jet2/Common.hpp"
 
 #pragma once
+
+namespace jet2 {
 
 template <typename T>
 class ArrayConst {
@@ -147,3 +149,4 @@ void ArrayLive<T>::notify(int32_t key) {
     } 
 }
 
+}

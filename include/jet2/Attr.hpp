@@ -22,9 +22,11 @@
 
 #pragma once
 
-#include "Common.hpp"
-#include "Hash.hpp"
-#include "Array.hpp"
+#include "jet2/Common.hpp"
+#include "jet2/Hash.hpp"
+#include "jet2/Array.hpp"
+
+namespace jet2 {
 
 template <typename T>
 class AttrConst {
@@ -115,4 +117,4 @@ void AttrLive<T>::subscribe(Listener const& listener) const {
     listener_.push_back(listener);
 }
 
-
+}

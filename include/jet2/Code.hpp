@@ -22,18 +22,41 @@
 
 #pragma once
 
-#include "Common.hpp"
-#include "Object.hpp"
+#include "jet2/Common.hpp"
+#include "jet2/Object.hpp"
 
-class Window : public Object {
+#define CODEAPI extern "C" __declspec(dllexport) 
+
+namespace jet2 {
+
+enum class CodeStatus { LOADED, UNLOADED, ERROR };
+using CodeFunc = void (*)(Code*);
+
+class Code : public Object {
+// Dynamically loads code from a DLL or shared library for use in the game.
+// Each DLL has an entry point (main) which gets called when the module is
+// loaded.  Failure to link the main entry point causes the module to be
+// disabled.  When the module is unloaded, all actors in the module are
+// disabled.
 public:
-    Window(std::string const& name);
-    ~Window();
+    Code(std::string const& name);
+    ~Code() { unload(); }
+    void reload();
+    void unload();
+    void load();
 
-    bool open() const { return window().isOpen(); }
-    void display() { window().display(); } 
-    void close() { window().close(); }
+    Attr<CodeStatus> status = CodeStatus::UNLOADED;
+#ifdef _WIN32
+    Attr<HMODULE> handle = nullptr; 
+#else
+    #error "not implemented"
+#endif
 
-    Attr<sf::Window> window;
+private:
+    CodeFunc start = 0;
+    CodeFunc stop = 0;
 };
+
+}
+
 

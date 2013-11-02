@@ -20,21 +20,24 @@
  * IN THE SOFTWARE.
  */
 
-#include "Attr.hpp"
-#include "Interface.hpp"
+#pragma once
 
-class AttributeBuffer;
-class IndexBuffer;
+#include "jet2/Common.hpp"
+#include "jet2/Object.hpp"
 
-class Mesh : public Interface {
+namespace jet2 {
+
+class Window : public Object {
 public:
-    Mesh(const std::string& name);
-    enum Status { SYNCED, DIRTY };
+    Window(std::string const& name);
+    ~Window();
 
-    Const<std::string> name;
-    Hash<std::string, Ptr<AttributeBuffer>> attribute_buffer; 
-    Const<Ptr<IndexBuffer>> index_buffer;
-    Attr<Status> status;
+    bool open() const { return window().isOpen(); }
+    void display() { window().display(); } 
+    void close() { window().close(); }
+
+    Attr<sf::Window> window;
 };
 
+}
 
