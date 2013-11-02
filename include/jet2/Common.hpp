@@ -33,6 +33,7 @@
 #include <SFML/Window.hpp>
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
+#include <sfr/sfr.hpp>
 #include <fstream>
 #include <string>
 #include <functional>
@@ -48,12 +49,6 @@
 namespace jet2 {
 class Code;
 class Database;
-class DrawBuffer;
 class Exception;
-class Frustum;
 class Object;
-class Mesh;
-class Matrix;
-class Vector;
-class Quaternion;
 }
