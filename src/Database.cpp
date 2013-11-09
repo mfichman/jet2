@@ -21,18 +21,12 @@
  */
 
 #include "jet2/Common.hpp"
-#include "jet2/Window.hpp"
-#include "jet2/Exception.hpp"
+#include "jet2/Database.hpp"
 
 namespace jet2 {
 
-void Window::init() {
-    glewExperimental = 1;
-    auto err = glewInit();
-    if (GLEW_OK != err) {
-        throw ResourceException((char const*)glewGetErrorString(err));
-    }
-    glViewport(0, 0, window().getSize().x, window().getSize().y);
-}
+Ptr<Database> const db = std::make_shared<Database>();
+Ptr<sfr::World> const scene = std::make_shared<sfr::World>();
+Ptr<sfr::AssetTable> const assets = std::make_shared<sfr::AssetTable>();
 
 }

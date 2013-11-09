@@ -13,6 +13,8 @@ class Jet2(pkgboot.Package):
         'sfml-network.lib',
         'sfml-system.lib',
         'sfml-window.lib',
+        'BulletCollision.lib',
+        'BulletDynamics.lib',
     ]
     major_version = '0'
     minor_version = '0'

@@ -20,19 +20,11 @@
  * IN THE SOFTWARE.
  */
 
-#include "jet2/Common.hpp"
-#include "jet2/Window.hpp"
-#include "jet2/Exception.hpp"
+#pragma once
 
 namespace jet2 {
 
-void Window::init() {
-    glewExperimental = 1;
-    auto err = glewInit();
-    if (GLEW_OK != err) {
-        throw ResourceException((char const*)glewGetErrorString(err));
-    }
-    glViewport(0, 0, window().getSize().x, window().getSize().y);
-}
+void init();
+void run();
 
 }

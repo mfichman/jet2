@@ -20,19 +20,17 @@
  * IN THE SOFTWARE.
  */
 
+#pragma once
+
+#include "jet2/Array.hpp"
+#include "jet2/Attr.hpp"
+#include "jet2/Code.hpp"
 #include "jet2/Common.hpp"
-#include "jet2/Window.hpp"
+#include "jet2/Context.hpp"
+#include "jet2/Database.hpp"
 #include "jet2/Exception.hpp"
-
-namespace jet2 {
-
-void Window::init() {
-    glewExperimental = 1;
-    auto err = glewInit();
-    if (GLEW_OK != err) {
-        throw ResourceException((char const*)glewGetErrorString(err));
-    }
-    glViewport(0, 0, window().getSize().x, window().getSize().y);
-}
-
-}
+#include "jet2/Functions.hpp"
+#include "jet2/Hash.hpp"
+#include "jet2/Object.hpp"
+#include "jet2/Window.hpp"
+#include "jet2/Kernel.hpp"

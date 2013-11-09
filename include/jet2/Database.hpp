@@ -38,6 +38,7 @@ public:
     Hash<std::string,Ptr<Object>> object;
 };
 
+
 template <typename T, typename... Arg>
 Ptr<T> Database::create(std::string const& path, Arg... arg) {
     // Creates a new object if it doesn't already exist and returns it 
@@ -47,5 +48,9 @@ Ptr<T> Database::create(std::string const& path, Arg... arg) {
     }
     return std::static_pointer_cast<T>(ret);
 };
+
+extern Ptr<Database> const db;
+extern Ptr<sfr::World> const scene;
+extern Ptr<sfr::AssetTable> const assets;
 
 }

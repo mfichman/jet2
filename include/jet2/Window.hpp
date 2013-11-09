@@ -29,14 +29,19 @@ namespace jet2 {
 
 class Window : public Object {
 public:
-    Window(std::string const& name);
-    ~Window();
-
-    bool open() const { return window().isOpen(); }
-    void display() { window().display(); } 
-    void close() { window().close(); }
+    template <typename ...Arg>
+    Window(std::string const& name, Arg... arg) : Object(name), window(arg...) {
+        init();      
+    }
 
     Attr<sf::Window> window;
+    
+    bool isOpen() { return window().isOpen(); }
+    void close() { window().close(); }
+    void display() { window().display(); }
+
+private:
+    void init();
 };
 
 }
