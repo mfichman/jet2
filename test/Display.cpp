@@ -25,7 +25,7 @@
 
 int main() {
 
-    auto win = jet2::Window("bob", sf::VideoMode(800, 600), "foo");
+    auto win = std::make_shared<jet2::Window>("bob", sf::VideoMode(800, 600), "foo");
 
 
     return 0;

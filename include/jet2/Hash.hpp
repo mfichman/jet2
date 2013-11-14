@@ -31,10 +31,9 @@ class HashConst {
 // A constant hash.
 public:
     typedef std::unordered_map<K,V> Coll;
-    
 
     HashConst() {}
-    HashConst(std::initializer_list<std::pair<K,V>> value) : value_(value) {}
+    HashConst(typename std::initializer_list<std::pair<K,V>> value) : value_(value) {}
     V const operator()(K const& key) const;
     typename Coll::const_iterator begin() const { return value_.begin(); }
     typename Coll::const_iterator end() const { return value_.end(); }
@@ -47,11 +46,10 @@ protected:
 template <typename K, typename V>
 class Hash : public HashConst<K,V> { 
 // A writable hash.
-
 public:
     V const operator()(K const& key) const;
-    V const& operator()(K const& key, V const& value) { value_[key] = value; return value; }
-    void clear() { value_.clear(); }
+    V const& operator()(K const& key, V const& value) { this->value_[key] = value; return value; }
+    void clear() { this->value_.clear(); }
 };
 
 template <typename K, typename V>
@@ -77,8 +75,8 @@ template <typename K, typename V>
 V const Hash<K,V>::operator()(K const& key) const {
 // Returns the value with key "key" from the collection, or a default V value
 // if the element doesn't exist.
-    auto i = value_.find(key);
-    return (i == value_.end()) ? V() : i->second;
+    auto i = this->value_.find(key);
+    return (i == this->value_.end()) ? V() : i->second;
 }
 
 template <typename K, typename V>
@@ -95,8 +93,8 @@ V const& HashLive<K,V>::operator()(K const& key, V const& value) {
 template <typename K, typename V>
 void HashLive<K,V>::clear() {
 // Clears the entire list, and then generates a notification.
-    Coll snapshot;
-    snapshot.swap(value_);
+    typename HashConst<K,V>::Coll snapshot;
+    snapshot.swap(this->value_);
     for (auto i = snapshot.begin(); i != snapshot.end(); ++i) {
         notify(i->first);
     }

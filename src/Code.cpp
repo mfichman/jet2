@@ -37,49 +37,11 @@ void Code::reload() {
     load();
 }
 
-void Code::load() {
-// Load the shared library/dll from the pathname, and invoke the "enter"
-// function to set up the dll.  Only loads the dll if it hasn't been loaded
-// already.
-    if(status() == CodeStatus::LOADED) { return; }
-    std::string const path = name()+".dll";
-    std::string const tmp = name()+".loaded.dll";
-    if (!CopyFile(path.c_str(), tmp.c_str(), false)) { 
-        throw ResourceException("couldn't copy library file");
-    }
-    // Make a copy of the original file, and load that.  This allows the
-    // original dll to be recompiled without permission errors, and then
-    // reloaded at a later time.
-    
-    handle = LoadLibrary(tmp.c_str());
-    if (!handle()) {
-        status = CodeStatus::ERROR;
-        throw ResourceException("failed to load library: "+name());
-    }
-    start = reinterpret_cast<CodeFunc>(GetProcAddress(handle(), "start"));
-    if (!start) {
-        status = CodeStatus::ERROR;
-        throw ResourceException("failed to find entry point for "+name());
-    }
-    stop = reinterpret_cast<CodeFunc>(GetProcAddress(handle(), "stop"));
-    if (!stop) {
-        status = CodeStatus::ERROR;
-        throw ResourceException("failed to find stop point for "+name());
-    }
-    start(this);
-    status = CodeStatus::LOADED;
 }
 
-void Code::unload() {
-// Invoke the "exit" function to do any requisite cleanup, and then free the
-// shared library/dll.  Only unloads the dll if it isn't already unloaded.
-    if (status() == CodeStatus::UNLOADED) { return; }
-    stop(this);
-    FreeLibrary(handle());
-    start = 0;
-    stop = 0;
-    handle = 0;
-    status = CodeStatus::UNLOADED;
-}
+#ifdef _WIN32
+#include "Code.win.inl"
+#else
+#include "Code.unix.inl"
+#endif
 
-}

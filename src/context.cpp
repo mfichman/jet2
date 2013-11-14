@@ -29,13 +29,15 @@ namespace jet2 {
 Context::Context(std::string const& name) : 
 // Create a new (headless) graphics context for rendering to files.
     Object(name),
-    context(sf::ContextSettings(8, 0, 0, 3, 0), 800, 600) {
+    context(sf::ContextSettings(8, 0, 0, 3, 2), 800, 600) {
 
+#ifdef sfr_USE_GLEW
     glewExperimental = 1;
     auto err = glewInit();
     if (GLEW_OK != err) {
         throw ResourceException((char const*)glewGetErrorString(err));
     }
+#endif
 }
 }
 

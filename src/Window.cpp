@@ -27,11 +27,18 @@
 namespace jet2 {
 
 void Window::init() {
+    auto settings = window().getSettings();
+    if (settings.majorVersion < 3 || (settings.majorVersion == 3 && settings.minorVersion < 2)) {
+        throw std::runtime_error("This program requires OpenGL 3.2");
+    }
+
+#ifdef sfr_USE_GLEW
     glewExperimental = 1;
     auto err = glewInit();
     if (GLEW_OK != err) {
         throw ResourceException((char const*)glewGetErrorString(err));
     }
+#endif
     glViewport(0, 0, window().getSize().x, window().getSize().y);
 }
 

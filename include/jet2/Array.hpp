@@ -50,8 +50,8 @@ public:
     Array() {} 
     T const operator()(int32_t key) const { return ArrayConst<T>::operator()(key); }
     T const& operator()(int32_t key, T const& value);
-    void push(T const& value) { value_.push_back(value); }
-    void clear() { value_.clear(); }
+    void push(T const& value) { this->value_.push_back(value); }
+    void clear() { this->value_.clear(); }
 };
 
 template <typename T>
@@ -77,13 +77,13 @@ template <typename T>
 T const ArrayConst<T>::operator()(int32_t key) const { 
 // Returns the nth element in the collection, or the default T otherwise.  A
 // negative number returns the nth element from the end of the collection.
-    int32_t const index = key < 0 ? value_.size() + key : key;
+    int32_t const index = key < 0 ? this->value_.size() + key : key;
     if (index < 0) {
         return T();
-    } else if (index >= value_.size()) {
+    } else if (index >= this->value_.size()) {
         return T(); 
     } else {
-        return value_[index];
+        return this->value_[index];
     }
 }
 
@@ -91,14 +91,14 @@ template <typename T>
 T const& Array<T>::operator()(int32_t key, T const& value) {
 // Replaces the nth element in the collection.  A negative number replaces the
 // nth element from the end.
-    int32_t const index = key < 0 ? value_.size() + key : key;
+    int32_t const index = key < 0 ? this->value_.size() + key : key;
     if (index < 0) {
         assert(!"index is out-of-range");
     } else {
-        if (index >= value_.size()) {
-            value_.resize(index+1);
+        if (index >= this->value_.size()) {
+            this->value_.resize(index+1);
         }
-        value_[index] = value;
+        this->value_[index] = value;
     }
     return value;
 }
@@ -118,14 +118,14 @@ template <typename T>
 void ArrayLive<T>::push(T const& value) {
 // Adds an element to the end of the array.
     Array<T>::push(value);
-    notify(value_.size()-1);
+    notify(this->value_.size()-1);
 }
 
 template <typename T>
 void ArrayLive<T>::clear() {
 // Clears the array, and notifies all listeners
-    Coll snapshot;
-    snapshot.swap(value_);
+    typename ArrayConst<T>::Coll snapshot;
+    snapshot.swap(this->value_);
     for (auto i = snapshot.begin(); i != snapshot.end(); ++i) {
         notify(*i);
     }

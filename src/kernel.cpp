@@ -38,7 +38,9 @@ void handleInput() {
 }
 
 void init() {
-    window = db->create<Window>("window", sf::VideoMode(1200, 800), "Window");
+    sf::ContextSettings settings(32, 0, 0, 3, 2);
+    sf::VideoMode mode(1200, 800);
+    window = db->create<Window>("window", mode, "Window", sf::Style::Default, settings);
     meshLoader = std::make_shared<sfr::WavefrontLoader>(assets);
     effectLoader = std::make_shared<sfr::EffectLoader>(assets);
     textureLoader = std::make_shared<sfr::TextureLoader>(assets);
@@ -54,13 +56,14 @@ void run() {
     auto root = scene->root();
 
     while (window->isOpen()) {
-        auto elapsedTime = clock.getElapsedTime();
+        //auto elapsedTime = clock.getElapsedTime();
         clock.restart();
         
         sf::Event evt;
         while (window->window().pollEvent(evt)) {
             switch (evt.type) {
             case sf::Event::Closed: exit(0); break;
+            default: break;
             }
         }
 
