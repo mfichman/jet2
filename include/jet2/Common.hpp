@@ -20,6 +20,9 @@
  * IN THE SOFTWARE.
  */
 
+#ifndef JET2_COMMON_HPP
+#define JET2_COMMON_HPP
+
 #include <SFML/Window.hpp>
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
@@ -50,3 +53,5 @@ class Database;
 class Exception;
 class Object;
 }
+
+#endif

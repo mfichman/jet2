@@ -22,7 +22,6 @@
 
 #include "jet2/Common.hpp"
 #include "jet2/Database.hpp"
-#include "jet2/Window.hpp"
 #include "jet2/Kernel.hpp"
 
 namespace jet2 {
@@ -31,7 +30,7 @@ namespace jet2 {
 Ptr<sfr::WavefrontLoader> meshLoader;
 Ptr<sfr::EffectLoader> effectLoader;
 Ptr<sfr::TextureLoader> textureLoader;
-Ptr<Window> window;
+Ptr<sf::Window> window;
 
 void handleInput() {
 
@@ -40,7 +39,22 @@ void handleInput() {
 void init() {
     sf::ContextSettings settings(32, 0, 0, 3, 2);
     sf::VideoMode mode(1200, 800);
-    window = db->create<Window>("window", mode, "Window", sf::Style::Default, settings);
+    window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Default, settings);
+
+    settings = window->getSettings();
+    if (settings.majorVersion < 3 || (settings.majorVersion == 3 && settings.minorVersion < 2)) {
+        throw std::runtime_error("This program requires OpenGL 3.2");
+    }
+
+#ifdef sfr_USE_GLEW
+    glewExperimental = 1;
+    auto err = glewInit();
+    if (GLEW_OK != err) {
+        throw ResourceException((char const*)glewGetErrorString(err));
+    }
+#endif
+    glViewport(0, 0, window->getSize().x, window->getSize().y);
+
     meshLoader = std::make_shared<sfr::WavefrontLoader>(assets);
     effectLoader = std::make_shared<sfr::EffectLoader>(assets);
     textureLoader = std::make_shared<sfr::TextureLoader>(assets);
@@ -60,7 +74,7 @@ void run() {
         clock.restart();
         
         sf::Event evt;
-        while (window->window().pollEvent(evt)) {
+        while (window->pollEvent(evt)) {
             switch (evt.type) {
             case sf::Event::Closed: exit(0); break;
             default: break;
