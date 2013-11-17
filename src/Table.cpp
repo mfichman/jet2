@@ -21,12 +21,10 @@
  */
 
 #include "jet2/Common.hpp"
-#include "jet2/Database.hpp"
+#include "jet2/Table.hpp"
 
 namespace jet2 {
 
-Ptr<Database> const db = std::make_shared<Database>();
-Ptr<sfr::World> const scene = std::make_shared<sfr::World>();
-Ptr<sfr::AssetTable> const assets = std::make_shared<sfr::AssetTable>();
-
 }
+
+

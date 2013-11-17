@@ -56,9 +56,11 @@ public:
     T const& operator=(T const& value) { value_ = value; return value; } 
     T const& operator()(T const& value) { return *this = value; }
     T const& operator()() const { return value_; }
-    T& operator()() { return value_; }
 
+private:
+    T& ref() { return value_; }
     T value_;
+    friend class Functor;
 };
 
 template <typename T>
@@ -81,10 +83,12 @@ public:
     void subscribe(Listener const& listener) const;
 
 private:
+    T& ref() { return value_; }
     void notify();
 
     T value_;
     mutable ListenerList listener_;
+    friend class Functor;
 };
 
 template <typename T>

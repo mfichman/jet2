@@ -26,7 +26,7 @@
 #include "jet2/Attr.hpp"
 #include "jet2/Code.hpp"
 #include "jet2/Common.hpp"
-#include "jet2/Database.hpp"
+#include "jet2/Table.hpp"
 #include "jet2/Exception.hpp"
 #include "jet2/Functions.hpp"
 #include "jet2/Hash.hpp"

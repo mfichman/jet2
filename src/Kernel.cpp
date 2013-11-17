@@ -21,7 +21,7 @@
  */
 
 #include "jet2/Common.hpp"
-#include "jet2/Database.hpp"
+#include "jet2/Table.hpp"
 #include "jet2/Kernel.hpp"
 
 namespace jet2 {
@@ -31,12 +31,16 @@ Ptr<sfr::WavefrontLoader> meshLoader;
 Ptr<sfr::EffectLoader> effectLoader;
 Ptr<sfr::TextureLoader> textureLoader;
 Ptr<sf::Window> window;
+Ptr<sfr::ShadowRenderer> shadowRenderer;
+Ptr<sfr::DeferredRenderer> deferredRenderer;
+Ptr<sfr::TransformUpdater> updater;
+Ptr<Table> const db = std::make_shared<Table>("db");
+Ptr<sfr::World> const scene = std::make_shared<sfr::World>();
+Ptr<sfr::AssetTable> const assets = std::make_shared<sfr::AssetTable>();
 
-void handleInput() {
-
-}
 
 void init() {
+    // Initialize the renderers, asset loaders, database, etc.
     sf::ContextSettings settings(32, 0, 0, 3, 2);
     sf::VideoMode mode(1200, 800);
     window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Default, settings);
@@ -58,21 +62,32 @@ void init() {
     meshLoader = std::make_shared<sfr::WavefrontLoader>(assets);
     effectLoader = std::make_shared<sfr::EffectLoader>(assets);
     textureLoader = std::make_shared<sfr::TextureLoader>(assets);
+    shadowRenderer = std::make_shared<sfr::ShadowRenderer>(assets);
+    deferredRenderer = std::make_shared<sfr::DeferredRenderer>(assets);
+    updater = std::make_shared<sfr::TransformUpdater>();
 }
 
-void run() {
+void sync() {
+    // Update the network.  Find all outgoing connections, and broadcast any
+    // updates to dirty objects.  
+    auto clock = sf::Clock(); 
+    while (true) {
+        clock.restart();
+    
+        auto elapsedTime = clock.getElapsedTime();
+        auto frameTime = sf::seconds(1./100.); // 10 ms
+        auto sleepTime = std::max(frameTime - elapsedTime, sf::seconds(0));
+        coro::sleep(coro::Time::microsec(sleepTime.asMicroseconds()));
+    }
+}
 
-    auto shadowRenderer = std::make_shared<sfr::ShadowRenderer>(assets);
-    auto deferredRenderer = std::make_shared<sfr::DeferredRenderer>(assets);
-    auto updater = std::make_shared<sfr::TransformUpdater>();
-
+void render() {
+    // Render one frame of the scene, and display it.  Run physics updates.
     auto clock = sf::Clock(); 
     auto root = scene->root();
-
-    while (window->isOpen()) {
-        //auto elapsedTime = clock.getElapsedTime();
+    while (true) {
         clock.restart();
-        
+    
         sf::Event evt;
         while (window->pollEvent(evt)) {
             switch (evt.type) {
@@ -80,13 +95,22 @@ void run() {
             default: break;
             }
         }
-
+    
         updater->operator()(scene); 
         shadowRenderer->operator()(scene);
         deferredRenderer->operator()(scene);
-
+    
         window->display(); 
+        auto elapsedTime = clock.getElapsedTime();
+        auto frameTime = sf::seconds(1./60.);
+        auto sleepTime = std::max(frameTime - elapsedTime, sf::seconds(0));
+        coro::sleep(coro::Time::microsec(sleepTime.asMicroseconds()));
     }
+}
+
+void run() {
+    coro::start(render);
+    coro::run();
 }
 
 }

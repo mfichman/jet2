@@ -17,6 +17,7 @@ class Jet2(pkgboot.Package):
         'sfml-system',
         'sfml-window',
         'sfr',
+        'coro',
         #'BulletCollision',
         #'BulletDynamics',
         #'BulletMultiThreaded',

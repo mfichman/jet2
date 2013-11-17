@@ -21,7 +21,7 @@
  */
 
 #include "jet2/Common.hpp"
-#include "jet2/Database.hpp"
+#include "jet2/Table.hpp"
 
 using namespace jet2;
 
@@ -32,9 +32,15 @@ public:
 };
 
 int main() {
-    auto db = std::make_shared<Database>();
+    auto db = std::make_shared<Table>("db");
 
-    db->create<DataStruct>("/foo/bar", 0);
+    db->objectIs<DataStruct>("foo/bar/baz", 0);
+
+    assert(db->object<Table>("foo"));
+    assert(db->object<Table>("foo/bar"));
+    assert(db->object<DataStruct>("foo/bar/baz"));
+    assert(db->object<Table>("foo")->object<DataStruct>("bar/baz"));
+    assert(db->object<Table>("foo")->object<Table>("bar")->object<DataStruct>("baz"));
 
     return 0;
 }

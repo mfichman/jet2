@@ -22,23 +22,22 @@
 
 #pragma once
 
+#include "jet2/Common.hpp"
 #include "jet2/Attr.hpp"
-#include <memory>
-#include <string>
 
 namespace jet2 {
-
-#undef Ptr
-template <typename T>
-using Ptr = std::shared_ptr<T>;
 
 class Object : public std::enable_shared_from_this<Object> {
 // A game object or resource.  Objects are identified by their long path name,
 // so that clients can look them up.
 public:
+    enum SyncMode { ALWAYS, ONCE, DISABLED };
+
     Object(std::string const& name) : name(name) {}
+    virtual ~Object() {}
 
     AttrConst<std::string> name;
+    Attr<SyncMode> syncMode; 
 };
 
 }

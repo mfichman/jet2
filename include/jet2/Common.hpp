@@ -50,9 +50,14 @@
 
 namespace jet2 {
 class Code;
-class Database;
+class Table;
 class Exception;
 class Object;
+class Visitor;
+
+template <typename T>
+using Ptr = std::shared_ptr<T>;
+
 }
 
 #endif

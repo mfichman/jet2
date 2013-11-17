@@ -27,4 +27,8 @@ namespace jet2 {
 void init();
 void run();
 
+extern Ptr<Table> const db;
+extern Ptr<sfr::World> const scene;
+extern Ptr<sfr::AssetTable> const assets;
+
 }
