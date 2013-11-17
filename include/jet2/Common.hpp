@@ -27,6 +27,7 @@
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 #include <sfr/sfr.hpp>
+#include <coro/coro.hpp>
 //#include <bullet/btBulletCollisionCommon.h>
 //#include <bullet/btBulletDynamicsCommon.h>
 #include <sfr/sfr.hpp>
