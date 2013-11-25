@@ -25,7 +25,7 @@ class Jet2(pkgboot.Package):
         for code in self.env.Glob('build/code/**.cpp'):
             self.env.Depends(code, self.pch)
             name = code.name.replace('.cpp', '')
-            lib = self.env.SharedLibrary('lib/%s' % name, (code, self.lib))
+            lib = self.env.SharedLibrary('lib/%s' % name, (code, self.lib, self.pch))
 
 
 Jet2()
