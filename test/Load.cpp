@@ -22,13 +22,13 @@
 
 #include "jet2/Common.hpp"
 #include "jet2/Code.hpp"
-#include "jet2/Database.hpp"
+#include "jet2/Table.hpp"
 
 using namespace jet2;
 
 int main() {
-    auto db = std::make_shared<Database>();
-    auto foo = db->create<Code>("lib/foo");
+    auto db = std::make_shared<Table>("db");
+    auto foo = db->objectIs<Code>("lib/foo");
     
     foo->unload();
     foo->reload();

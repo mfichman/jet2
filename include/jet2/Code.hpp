@@ -25,7 +25,11 @@
 #include "jet2/Common.hpp"
 #include "jet2/Object.hpp"
 
-#define CODEAPI extern "C" __declspec(dllexport) 
+#ifdef _WIN32
+#define JET2_CODEAPI extern "C" __declspec(dllexport) 
+#else
+#define JET2_CODEAPI extern "C"
+#endif
 
 namespace jet2 {
 
@@ -49,7 +53,7 @@ public:
 #ifdef _WIN32
     Attr<HMODULE> handle = nullptr; 
 #else
-    #error "not implemented"
+    Attr<void*> handle = nullptr;
 #endif
 
 private:

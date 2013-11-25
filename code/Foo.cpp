@@ -23,11 +23,11 @@
 #include "jet2/Common.hpp"
 #include "jet2/Code.hpp"
 
-CODEAPI void start(jet2::Code* code) {
+JET2_CODEAPI void start(jet2::Code* code) {
     std::cout << "foo" << std::endl;
 }
 
-CODEAPI void stop(jet2::Code* code) {
+JET2_CODEAPI void stop(jet2::Code* code) {
     std::cout << "bar" << std::endl;
 }
 

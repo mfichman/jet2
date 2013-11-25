@@ -20,21 +20,16 @@
  * IN THE SOFTWARE.
  */
 
-#ifdef _WIN32
-#define VC_EXTRALEAN
-#define WIN32_LEAN_AND_MEAN
-#define GLEW_STATIC
-#include <windows.h>
-#include <GL/glew.h>
-#include <Gl/gl.h>
-#undef ERROR
-#endif
+#ifndef JET2_COMMON_HPP
+#define JET2_COMMON_HPP
 
 #include <SFML/Window.hpp>
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
-#include <bullet/btBulletCollisionCommon.h>
-#include <bullet/btBulletDynamicsCommon.h>
+#include <sfr/sfr.hpp>
+#include <coro/coro.hpp>
+//#include <bullet/btBulletCollisionCommon.h>
+//#include <bullet/btBulletDynamicsCommon.h>
 #include <sfr/sfr.hpp>
 #include <fstream>
 #include <string>
@@ -47,10 +42,22 @@
 #include <cstdint>
 #include <iostream>
 #include <cmath>
+#include <initializer_list>
+
+#ifndef _WIN32
+#include <dlfcn.h>
+#endif
 
 namespace jet2 {
 class Code;
-class Database;
+class Table;
 class Exception;
 class Object;
+class Visitor;
+
+template <typename T>
+using Ptr = std::shared_ptr<T>;
+
 }
+
+#endif

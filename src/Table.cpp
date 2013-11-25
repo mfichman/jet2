@@ -20,37 +20,11 @@
  * IN THE SOFTWARE.
  */
 
-#pragma once
-
 #include "jet2/Common.hpp"
-#include "jet2/Object.hpp"
-#include "jet2/Attr.hpp"
+#include "jet2/Table.hpp"
 
 namespace jet2 {
 
-class Database : public std::enable_shared_from_this<Database> {
-// Contains a database of objects for the game, listed by long path name.  In
-// addition, the Database can automatically synchronize with a remote Database.
-public:
-    template <typename T, typename... Arg> 
-    Ptr<T> create(std::string const& path, Arg...);
-
-    Hash<std::string,Ptr<Object>> object;
-};
-
-
-template <typename T, typename... Arg>
-Ptr<T> Database::create(std::string const& path, Arg... arg) {
-    // Creates a new object if it doesn't already exist and returns it 
-    auto ret = object(path);
-    if (!ret) {
-        ret = object(path, std::make_shared<T>(path, arg...));
-    }
-    return std::static_pointer_cast<T>(ret);
-};
-
-extern Ptr<Database> const db;
-extern Ptr<sfr::World> const scene;
-extern Ptr<sfr::AssetTable> const assets;
-
 }
+
+
