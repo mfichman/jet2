@@ -20,9 +20,11 @@ def run_test(target, source, env):
 
 def build_pch(target, source, env):
     try:
+        includes = ' '.join(['-I%s' % inc for inc in env['CPPPATH']])
         args = (
             str(env['CXX']),
             str(env['CXXFLAGS']),
+            includes,
             '-x'
             'c++-header',
             str(source[0]),

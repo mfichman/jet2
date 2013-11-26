@@ -26,7 +26,7 @@
 
 namespace jet2 {
 
-std::string read_file(std::string const& path) {
+std::string readFile(std::string const& path) {
 // Read the whole file into a single string.  If the file can't be read, throw
 // an exception.
     std::string ret;
@@ -41,7 +41,7 @@ std::string read_file(std::string const& path) {
     return ret;
 }
 
-void screen_snapshot(std::string const& file) {
+void screenSnapshot(std::string const& file) {
 // Write the context to a file
     GLint ret[4];
     glGetIntegerv(GL_VIEWPORT, ret);
@@ -55,4 +55,9 @@ void screen_snapshot(std::string const& file) {
     image.saveToFile(file);
 }
 
+
+btVector3 boundingBox(Ptr<sfr::Transform> node) {
+
+    return btVector3();
+}
 }

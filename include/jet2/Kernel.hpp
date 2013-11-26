@@ -22,13 +22,17 @@
 
 #pragma once
 
+#include "jet2/Common.hpp"
+
 namespace jet2 {
 
 void init();
 void run();
+void exit();
 
 extern Ptr<Table> const db;
-extern Ptr<sfr::World> const scene;
 extern Ptr<sfr::AssetTable> const assets;
+extern Ptr<sfr::World> const scene;
+extern Ptr<btDiscreteDynamicsWorld> const world;
 
 }

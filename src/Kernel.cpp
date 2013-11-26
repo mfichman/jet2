@@ -23,24 +23,35 @@
 #include "jet2/Common.hpp"
 #include "jet2/Table.hpp"
 #include "jet2/Kernel.hpp"
+#include "jet2/Connection.hpp"
 
 namespace jet2 {
 
 
-Ptr<sfr::WavefrontLoader> meshLoader;
-Ptr<sfr::EffectLoader> effectLoader;
-Ptr<sfr::TextureLoader> textureLoader;
 Ptr<sf::Window> window;
+
+// Rendering
+Ptr<sfr::World> const scene(new sfr::World);
+Ptr<sfr::AssetTable> const assets(new sfr::AssetTable);
+Ptr<sfr::WavefrontLoader> const meshLoader(new sfr::WavefrontLoader(assets));
+Ptr<sfr::EffectLoader> const effectLoader(new sfr::EffectLoader(assets));
+Ptr<sfr::TextureLoader> const textureLoader(new sfr::TextureLoader(assets));
+Ptr<sfr::TransformUpdater> const updater(new sfr::TransformUpdater);
+Ptr<sfr::BoundsRenderer> boundsRenderer;
 Ptr<sfr::ShadowRenderer> shadowRenderer;
 Ptr<sfr::DeferredRenderer> deferredRenderer;
-Ptr<sfr::TransformUpdater> updater;
-Ptr<Table> const db = std::make_shared<Table>("db");
-Ptr<sfr::World> const scene = std::make_shared<sfr::World>();
-Ptr<sfr::AssetTable> const assets = std::make_shared<sfr::AssetTable>();
 
+// Physics
+Ptr<btDefaultCollisionConfiguration> const collisionConfig(new btDefaultCollisionConfiguration());
+Ptr<btCollisionDispatcher> const dispatcher(new btCollisionDispatcher(collisionConfig.get()));
+Ptr<btDbvtBroadphase> const broadphase(new btDbvtBroadphase());
+Ptr<btSequentialImpulseConstraintSolver> const solver(new btSequentialImpulseConstraintSolver());
+Ptr<btDiscreteDynamicsWorld> const world(new btDiscreteDynamicsWorld(dispatcher.get(), broadphase.get(), solver.get(), collisionConfig.get()));
+
+Ptr<Table> const db = std::make_shared<Table>("db");
 
 void init() {
-    // Initialize the renderers, asset loaders, database, etc.
+// Initialize the renderers, asset loaders, database, etc.
     sf::ContextSettings settings(32, 0, 0, 3, 2);
     sf::VideoMode mode(1200, 800);
     window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Default, settings);
@@ -50,6 +61,7 @@ void init() {
         throw std::runtime_error("This program requires OpenGL 3.2");
     }
 
+    // OpenGL initialization
 #ifdef sfr_USE_GLEW
     glewExperimental = 1;
     auto err = glewInit();
@@ -59,57 +71,76 @@ void init() {
 #endif
     glViewport(0, 0, window->getSize().x, window->getSize().y);
 
-    meshLoader = std::make_shared<sfr::WavefrontLoader>(assets);
-    effectLoader = std::make_shared<sfr::EffectLoader>(assets);
-    textureLoader = std::make_shared<sfr::TextureLoader>(assets);
+    boundsRenderer = std::make_shared<sfr::BoundsRenderer>(assets);
     shadowRenderer = std::make_shared<sfr::ShadowRenderer>(assets);
     deferredRenderer = std::make_shared<sfr::DeferredRenderer>(assets);
-    updater = std::make_shared<sfr::TransformUpdater>();
 }
 
-void sync() {
-    // Update the network.  Find all outgoing connections, and broadcast any
-    // updates to dirty objects.  
+void task(void (*func)(sf::Time const&), uint64_t hz) {
+// Invokes task function 'func' once per the interval given by 'rate'
+    auto interval = sf::seconds(1./(double)hz);
     auto clock = sf::Clock(); 
     while (true) {
+        auto delta = clock.getElapsedTime();
         clock.restart();
-    
-        auto elapsedTime = clock.getElapsedTime();
-        auto frameTime = sf::seconds(1./100.); // 10 ms
-        auto sleepTime = std::max(frameTime - elapsedTime, sf::seconds(0));
-        coro::sleep(coro::Time::microsec(sleepTime.asMicroseconds()));
+        func(delta);
+        auto used = clock.getElapsedTime();
+        auto sleep = std::max(interval-used, sf::seconds(0));
+        coro::sleep(coro::Time::microsec(sleep.asMicroseconds()));
     }
 }
 
-void render() {
-    // Render one frame of the scene, and display it.  Run physics updates.
-    auto clock = sf::Clock(); 
-    auto root = scene->root();
-    while (true) {
-        clock.restart();
-    
-        sf::Event evt;
-        while (window->pollEvent(evt)) {
-            switch (evt.type) {
-            case sf::Event::Closed: exit(0); break;
-            default: break;
+
+void sync(sf::Time const& delta) {
+// Update the network.  Find all outgoing connections, and broadcast any
+// updates to dirty objects.  
+    for (auto obj : *db->object<Table>("conn")) {
+        auto conn = std::dynamic_pointer_cast<Connection>(obj.second);
+        if (!conn) { continue; }
+        for (auto obj : *db->object<Table>("data")) {
+            if (obj.second->syncMode()==Object::DISABLED) { continue; }
+            conn->out()->val(obj.second);
+            if (obj.second->syncMode()==Object::ONCE) {
+                obj.second->syncMode = Object::DISABLED;
             }
         }
-    
-        updater->operator()(scene); 
-        shadowRenderer->operator()(scene);
-        deferredRenderer->operator()(scene);
-    
-        window->display(); 
-        auto elapsedTime = clock.getElapsedTime();
-        auto frameTime = sf::seconds(1./60.);
-        auto sleepTime = std::max(frameTime - elapsedTime, sf::seconds(0));
-        coro::sleep(coro::Time::microsec(sleepTime.asMicroseconds()));
     }
+}
+
+void input(sf::Time const& delta) {
+// Handle window input and dispatch it to any listeners.
+    sf::Event evt;
+    while (window->pollEvent(evt)) {
+        switch (evt.type) {
+        case sf::Event::Closed: ::exit(0); break;
+        default: break;
+        }
+    }
+}
+
+void render(sf::Time const& delta) {
+// Render one frame of the scene, and display it. 
+    updater->operator()(scene); 
+    shadowRenderer->operator()(scene);
+    deferredRenderer->operator()(scene);
+    boundsRenderer->operator()(scene);
+
+    window->display(); 
+}
+
+void physics(sf::Time const& delta) {
+    world->stepSimulation(delta.asSeconds(), 4, btScalar(1.)/btScalar(120.));
+}
+
+void exit() {
 }
 
 void run() {
-    coro::start(render);
+    coro::start(std::bind(task, render, 60));
+    coro::start(std::bind(task, input, 120));
+    coro::start(std::bind(task, physics, 120));
+    //coro::start(std::bind(task, sync, 120));
+    // Run at 120 Hz for better response time
     coro::run();
 }
 

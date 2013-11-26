@@ -26,7 +26,8 @@
 
 namespace jet2 {
 
-std::string read_file(std::string const& path);
-void screen_snapshot(std::string const& file);
+std::string readFile(std::string const& path);
+void screenSnapshot(std::string const& file);
+btVector3 boundingBox(Ptr<sfr::Transform> node);
 
 }

@@ -28,8 +28,8 @@
 #include <SFML/Graphics.hpp>
 #include <sfr/sfr.hpp>
 #include <coro/coro.hpp>
-//#include <bullet/btBulletCollisionCommon.h>
-//#include <bullet/btBulletDynamicsCommon.h>
+#include <bullet/btBulletCollisionCommon.h>
+#include <bullet/btBulletDynamicsCommon.h>
 #include <sfr/sfr.hpp>
 #include <fstream>
 #include <string>
@@ -53,7 +53,7 @@ class Code;
 class Table;
 class Exception;
 class Object;
-class Visitor;
+class Functor;
 
 template <typename T>
 using Ptr = std::shared_ptr<T>;

@@ -20,26 +20,25 @@
  * IN THE SOFTWARE.
  */
 
-#pragma once
-
 #include "jet2/Common.hpp"
-#include "jet2/Attr.hpp"
+#include "jet2/Node.hpp"
 
 namespace jet2 {
 
-class Object : public std::enable_shared_from_this<Object> {
-// A game object or resource.  Objects are identified by their long path name,
-// so that clients can look them up.
-public:
-    enum SyncMode { ALWAYS, ONCE, DISABLED };
-
-    Object(std::string const& name) : name(name) {}
-    virtual ~Object() {}
-    virtual void visit(Ptr<Functor> func) {}
-
-    AttrConst<std::string> name;
-    Attr<SyncMode> syncMode; 
-};
-
+void Node::getWorldTransform(btTransform& trans) const {
+    auto pos = root()->position();
+    auto rotation = root()->rotation();
+    auto btq = btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w);
+    auto btv = btVector3(pos.x, pos.y, pos.z);
+    trans = btTransform(btq, btv);
 }
 
+void Node::setWorldTransform(btTransform const& trans) {
+    auto pos = trans.getOrigin();
+    auto rotation = trans.getRotation();
+    auto sfrq = sfr::Quaternion(rotation.x(), rotation.y(), rotation.z(), rotation.w());
+    auto sfrv = sfr::Vector(pos.x(), pos.y(), pos.z());
+    root()->transformIs(sfr::Matrix(sfrq, sfrv));
+}
+
+}

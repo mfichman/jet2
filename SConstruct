@@ -18,10 +18,11 @@ class Jet2(pkgboot.Package):
         'sfml-window',
         'sfr',
         'coro',
-        #'BulletCollision',
-        #'BulletDynamics',
-        #'BulletMultiThreaded',
-        #'BulletSoftBody',
+        'BulletMultiThreaded',
+        'BulletSoftBody',
+        'BulletDynamics',
+        'BulletCollision',
+        'LinearMath',
     ]
     frameworks = [
         'OpenGL',

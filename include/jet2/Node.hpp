@@ -23,23 +23,23 @@
 #pragma once
 
 #include "jet2/Common.hpp"
-#include "jet2/Attr.hpp"
+#include "jet2/Object.hpp"
+#include "jet2/Functor.hpp"
 
 namespace jet2 {
 
-class Object : public std::enable_shared_from_this<Object> {
-// A game object or resource.  Objects are identified by their long path name,
-// so that clients can look them up.
+class Node : public virtual btMotionState, public Object {
 public:
-    enum SyncMode { ALWAYS, ONCE, DISABLED };
+    Node(std::string const& name, Ptr<sfr::Transform> root) : Object(name), root(root) {}
+    virtual ~Node() {};
+    void getWorldTransform(btTransform& trans) const;
+    void setWorldTransform(btTransform const& trans);
 
-    Object(std::string const& name) : name(name) {}
-    virtual ~Object() {}
-    virtual void visit(Ptr<Functor> func) {}
-
-    AttrConst<std::string> name;
-    Attr<SyncMode> syncMode; 
+    AttrConst<Ptr<sfr::Transform>> root;
+    Attr<sfr::Vector> position;
+    Attr<sfr::Quaternion> rotation;
+    
+    SERIALIZED(position, rotation);
 };
 
-}
-
+};

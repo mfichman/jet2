@@ -23,23 +23,31 @@
 #pragma once
 
 #include "jet2/Common.hpp"
+#include "jet2/Object.hpp"
+#include "jet2/Functor.hpp"
 #include "jet2/Attr.hpp"
+#include "jet2/Reader.hpp"
+#include "jet2/Writer.hpp"
 
 namespace jet2 {
 
-class Object : public std::enable_shared_from_this<Object> {
-// A game object or resource.  Objects are identified by their long path name,
-// so that clients can look them up.
+class Message {
 public:
-    enum SyncMode { ALWAYS, ONCE, DISABLED };
+    std::string name;    
+    Ptr<Object> obj;
 
-    Object(std::string const& name) : name(name) {}
-    virtual ~Object() {}
-    virtual void visit(Ptr<Functor> func) {}
+    //SERIALIZE(name, obj);
+};
 
-    AttrConst<std::string> name;
-    Attr<SyncMode> syncMode; 
+class Connection : public Object {
+public:
+    Connection(std::string const& name, Ptr<coro::Socket> sd);
+
+    AttrConst<Ptr<coro::Socket>> sd;
+    AttrConst<Ptr<Writer<coro::Socket>>> writer;
+    AttrConst<Ptr<Reader<coro::Socket>>> reader;
+    AttrConst<Ptr<Functor>> out;
+    AttrConst<Ptr<Functor>> in;
 };
 
 }
-

@@ -73,7 +73,7 @@ void Writer<T>::write(char* buf, size_t total) {
 template <typename T>
 void Writer<T>::flush() {
 // Flush to the underlying socket/file descriptor
-    fd_->write(&buffer_.front(), buffer_.size());
+    fd_->write(&buffer_.front(), len_);
     len_ = 0;
 }
 

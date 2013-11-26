@@ -20,26 +20,17 @@
  * IN THE SOFTWARE.
  */
 
-#pragma once
-
 #include "jet2/Common.hpp"
-#include "jet2/Attr.hpp"
+#include "jet2/BoxNode.hpp"
+#include "jet2/Functions.hpp"
 
 namespace jet2 {
 
-class Object : public std::enable_shared_from_this<Object> {
-// A game object or resource.  Objects are identified by their long path name,
-// so that clients can look them up.
-public:
-    enum SyncMode { ALWAYS, ONCE, DISABLED };
-
-    Object(std::string const& name) : name(name) {}
-    virtual ~Object() {}
-    virtual void visit(Ptr<Functor> func) {}
-
-    AttrConst<std::string> name;
-    Attr<SyncMode> syncMode; 
-};
-
+BoxNode::BoxNode(std::string const& name, Ptr<sfr::Transform> root, btScalar mass) : 
+    Node(name, root),
+    shape_(new btBoxShape(boundingBox(root))),
+    body_(new btRigidBody(mass, this, shape_.get())) {
 }
 
+
+}

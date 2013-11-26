@@ -23,23 +23,21 @@
 #pragma once
 
 #include "jet2/Common.hpp"
-#include "jet2/Attr.hpp"
+#include "jet2/Node.hpp"
 
 namespace jet2 {
 
-class Object : public std::enable_shared_from_this<Object> {
-// A game object or resource.  Objects are identified by their long path name,
-// so that clients can look them up.
+class BoxNode : public Node {
 public:
-    enum SyncMode { ALWAYS, ONCE, DISABLED };
+    BoxNode(std::string const& name, Ptr<sfr::Transform> root, btScalar mass);
+    virtual ~BoxNode() {}
 
-    Object(std::string const& name) : name(name) {}
-    virtual ~Object() {}
-    virtual void visit(Ptr<Functor> func) {}
+    Ptr<btRigidBody> body() const { return body_; }
+    Ptr<btBoxShape> shape() const { return shape_; }
 
-    AttrConst<std::string> name;
-    Attr<SyncMode> syncMode; 
+private:
+    Ptr<btBoxShape> shape_;
+    Ptr<btRigidBody> body_;
 };
 
 }
-
