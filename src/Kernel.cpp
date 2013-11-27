@@ -136,9 +136,9 @@ void exit() {
 }
 
 void run() {
-    coro::start(std::bind(task, render, 60));
-    coro::start(std::bind(task, input, 120));
-    coro::start(std::bind(task, physics, 120));
+    auto crender = coro::start(std::bind(task, render, 60));
+    auto cinput = coro::start(std::bind(task, input, 120));
+    auto cphysics = coro::start(std::bind(task, physics, 120));
     //coro::start(std::bind(task, sync, 120));
     // Run at 120 Hz for better response time
     coro::run();
