@@ -26,7 +26,7 @@
 
 namespace jet2 {
 
-Code::Code(std::string const& name) : Object(name) {
+Code::Code(std::string const& name) : name(name) {
 // Create a new code object and load it from the dll/so
     load();
 }

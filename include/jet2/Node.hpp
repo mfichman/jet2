@@ -30,16 +30,23 @@ namespace jet2 {
 
 class Node : public virtual btMotionState, public Object {
 public:
-    Node(std::string const& name, Ptr<sfr::Transform> root) : Object(name), root(root) {}
+    Node(Ptr<sfr::Transform> root, btScalar mass);
     virtual ~Node() {};
     void getWorldTransform(btTransform& trans) const;
     void setWorldTransform(btTransform const& trans);
 
+    Ptr<btRigidBody> body() const { return body_; }
+    Ptr<btCompoundShape> shape() const { return shape_; }
+
     AttrConst<Ptr<sfr::Transform>> root;
     Attr<sfr::Vector> position;
     Attr<sfr::Quaternion> rotation;
-    
+
     SERIALIZED(position, rotation);
+
+private:
+    Ptr<btRigidBody> body_;
+    Ptr<btCompoundShape> shape_;
 };
 
 };

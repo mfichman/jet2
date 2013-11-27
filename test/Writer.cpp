@@ -22,8 +22,8 @@ void readmsg(Ptr<Functor> in) {
         while (true) {
             in->val(msg);
             std::cout << "msg: " << msg->string() << std::endl;
-            if (msg->string().empty()) {
-                return;
+            if (msg->string()=="bob") {
+                exit(0);
             }
         }
     } catch (coro::SystemError const& ex) {
@@ -78,7 +78,7 @@ void client() {
         coro::yield();
 
         auto msg = std::make_shared<Message>();
-        for (int i = 0; i < 100; ++i) {
+        for (int i = 0; i < 1; ++i) {
             msg->string = std::string("hello world");
             msg->number = 42;
             out->val(msg);

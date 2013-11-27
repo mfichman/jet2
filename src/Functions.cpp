@@ -23,6 +23,9 @@
 #include "jet2/Common.hpp"
 #include "jet2/Functions.hpp"
 #include "jet2/Exception.hpp"
+#include "jet2/Kernel.hpp"
+#include "jet2/Table.hpp"
+#include "jet2/ShapeBuilder.hpp"
 
 namespace jet2 {
 
@@ -55,9 +58,33 @@ void screenSnapshot(std::string const& file) {
     image.saveToFile(file);
 }
 
-
-btVector3 boundingBox(Ptr<sfr::Transform> node) {
-
-    return btVector3();
+Ptr<btBoxShape> shapeFor(Ptr<sfr::Mesh> mesh) {
+// Return the box shape for a mesh, based on its bounding box.
+    auto shape = db->object<btBoxShape>(mesh->name());
+    if (!shape) {
+        auto bounds = mesh->bounds();
+        auto extent = (bounds.max-bounds.min)/2.;
+        auto btExtent = btVector3(extent.x, extent.y, extent.z);
+        shape = db->objectIs<btBoxShape>(mesh->name(), btExtent);
+    }
+    return shape;
 }
+
+Ptr<btCompoundShape> shapeFor(Ptr<sfr::Transform> node) {
+// Recursively build a btCompoundShape made up of the individual bounding boxes
+// for each sub-mesh/subtransform of the sfr::Transform.
+    auto shape = db->object<btCompoundShape>(node->name());
+    if (!shape) {
+        shape = db->objectIs<btCompoundShape>(node->name());
+        ShapeBuilder(shape, node);
+    }
+    return shape;
+}
+
+btScalar massFor(Ptr<sfr::Transform> node, btScalar) {
+// Recursively compute the mass of the node using a uniform density and the
+// total volume of the mesh bounding boxes nested within the node.
+    return 1.;
+}
+
 }

@@ -20,17 +20,23 @@
  * IN THE SOFTWARE.
  */
 
+#pragma once
+
 #include "jet2/Common.hpp"
-#include "jet2/BoxNode.hpp"
-#include "jet2/Functions.hpp"
 
 namespace jet2 {
 
-BoxNode::BoxNode(std::string const& name, Ptr<sfr::Transform> root, btScalar mass) : 
-    Node(name, root),
-    shape_(new btBoxShape(boundingBox(root))),
-    body_(new btRigidBody(mass, this, shape_.get())) {
-}
-
+class ShapeBuilder : public sfr::Node::Functor {
+// Recursively build a btCompoundShape made up of the individual bounding boxes
+// for each sub-mesh/subtransform of the sfr::Transform.
+public:
+    ShapeBuilder(Ptr<btCompoundShape> shape, Ptr<sfr::Transform> node); 
+    void operator()(Ptr<sfr::Transform> node);
+    void operator()(Ptr<sfr::Model> node);
+    void operator()(Ptr<sfr::Mesh> node);
+private:
+    Ptr<btCompoundShape> shape_;
+    sfr::Matrix transform_;
+};
 
 }

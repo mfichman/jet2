@@ -43,6 +43,7 @@ class Connection : public Object {
 public:
     Connection(std::string const& name, Ptr<coro::Socket> sd);
 
+    AttrConst<std::string> name;
     AttrConst<Ptr<coro::Socket>> sd;
     AttrConst<Ptr<Writer<coro::Socket>>> writer;
     AttrConst<Ptr<Reader<coro::Socket>>> reader;

@@ -48,7 +48,7 @@ Ptr<btDbvtBroadphase> const broadphase(new btDbvtBroadphase());
 Ptr<btSequentialImpulseConstraintSolver> const solver(new btSequentialImpulseConstraintSolver());
 Ptr<btDiscreteDynamicsWorld> const world(new btDiscreteDynamicsWorld(dispatcher.get(), broadphase.get(), solver.get(), collisionConfig.get()));
 
-Ptr<Table> const db = std::make_shared<Table>("db");
+Ptr<Table> const db = std::make_shared<Table>();
 
 void init() {
 // Initialize the renderers, asset loaders, database, etc.
@@ -62,11 +62,11 @@ void init() {
     }
 
     // OpenGL initialization
-#ifdef sfr_USE_GLEW
+#ifdef SFR_USE_GLEW
     glewExperimental = 1;
     auto err = glewInit();
     if (GLEW_OK != err) {
-        throw ResourceException((char const*)glewGetErrorString(err));
+        throw std::runtime_error((char const*)glewGetErrorString(err));
     }
 #endif
     glViewport(0, 0, window->getSize().x, window->getSize().y);
@@ -94,14 +94,15 @@ void task(void (*func)(sf::Time const&), uint64_t hz) {
 void sync(sf::Time const& delta) {
 // Update the network.  Find all outgoing connections, and broadcast any
 // updates to dirty objects.  
-    for (auto obj : *db->object<Table>("conn")) {
-        auto conn = std::dynamic_pointer_cast<Connection>(obj.second);
+    for (auto ent : *db->object<Table>("conn")) {
+        auto conn = ent.second.cast<Connection>();
         if (!conn) { continue; }
         for (auto obj : *db->object<Table>("data")) {
-            if (obj.second->syncMode()==Object::DISABLED) { continue; }
-            conn->out()->val(obj.second);
-            if (obj.second->syncMode()==Object::ONCE) {
-                obj.second->syncMode = Object::DISABLED;
+            auto data = ent.second.cast<Object>();
+            if (data->syncMode()==Object::DISABLED) { continue; }
+            conn->out()->val(data);
+            if (data->syncMode()==Object::ONCE) {
+                data->syncMode = Object::DISABLED;
             }
         }
     }

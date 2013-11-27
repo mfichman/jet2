@@ -28,16 +28,36 @@
 
 namespace jet2 {
 
+class TableEntry {
+// Stores type info along with a void ptr, so that the type can be checked when
+// an object is removed from the table.  Does not support casting to base
+// types; the type given when the TableEntry was constructed must exactly match
+// the cast type.
+public:
+    template <typename T>
+    TableEntry(Ptr<T> ptr) : object_(ptr), type_(typeid(T)) {}
+    TableEntry() : type_(typeid(void)) {}
+
+    template <typename T>
+    Ptr<T> cast() {
+        return typeid(T) == type_ ? std::static_pointer_cast<T>(object_) : 0;
+    }
+    
+    Ptr<void> ptr() { return object_; }
+
+private:
+    Ptr<void> object_;
+    std::type_info const& type_;
+};
+
 class Table : public Object {
 // Contains a database of objects for the game, listed by long path name.  In
 // addition, the Table can automatically synchronize with a remote Table.
 public:
-    Table(std::string const& name) : Object(name) {}
-
-    typedef std::unordered_map<std::string,Ptr<Object>> Coll;
+    typedef std::unordered_map<std::string,TableEntry> Coll;
 
     template <typename T, typename... Arg> 
-    Ptr<T> objectIs(std::string const& path, Arg...arg) {
+    Ptr<T> objectIs(std::string const& path, Arg const&...arg) {
         return objectIs<T>(path.c_str(), arg...);
     }
 
@@ -47,7 +67,7 @@ public:
     }
 
     template <typename T, typename... Arg>
-    Ptr<T> objectIs(char const* path, Arg...arg);
+    Ptr<T> objectIs(char const* path, Arg const&...arg);
 
     template <typename T>
     Ptr<T> object(char const* path);
@@ -61,8 +81,9 @@ private:
 
 
 template <typename T, typename... Arg>
-Ptr<T> Table::objectIs(char const* path, Arg... arg) {
-    // Creates a new object if it doesn't already exist and returns it 
+Ptr<T> Table::objectIs(char const* path, Arg const&... arg) {
+    // Creates a new object if it doesn't already exist and returns it.  If the
+    // object already exists, then this function fails.
     auto ptr = strchr(path, '/');
     assert(*path != '\0'); // String is empty
     assert(ptr != path); // String starts with a '/'
@@ -71,22 +92,24 @@ Ptr<T> Table::objectIs(char const* path, Arg... arg) {
         //  012/   3-0 = 3 len
         auto len = ptr - path;
         auto name = std::string(path, len);
-        auto obj = object_[name];
-        auto table = std::dynamic_pointer_cast<Table>(obj);
-        assert(obj==table); // Object already exists and it isn't a table
-        if (!table) {
-            table = std::make_shared<Table>(name);
-            object_[name] = table;
+        auto ent = object_.find(name);
+        if (ent == object_.end()) {
+            auto table = std::make_shared<Table>();
+            object_.insert(std::make_pair(name, table));
+            return table->objectIs<T>(ptr+1, arg...);
+        } else {
+            auto table = ent->second.cast<Table>();
+            assert(table); // Make sure object exists, and is s table
+            return table->objectIs<T>(ptr+1, arg...);
         }
-        return table->objectIs<T>(ptr+1, arg...);
     } else {
         // Leaf node; create the object here
         auto name = std::string(path);
-        auto ret = object_[name];
-        assert(!ret); // Object already exists
-        ret = std::make_shared<T>(name, arg...);
-        object_[name] = ret;
-        return std::dynamic_pointer_cast<T>(ret);
+        auto ent = object_.find(name);
+        assert(ent==object_.end()); // Object already exists
+        auto obj = std::make_shared<T>(arg...);
+        object_.insert(std::make_pair(name, obj));
+        return obj;
     }
 };
 
@@ -101,14 +124,14 @@ Ptr<T> Table::object(char const* path) {
         //  012/   3-0 = 3 len
         auto len = ptr - path;
         auto name = std::string(path, len);
-        auto obj = object_[name];
-        auto table = std::dynamic_pointer_cast<Table>(obj);
+        auto ent = object_[name];
+        auto table = ent.cast<Table>();
         return table ? table->object<T>(ptr+1) : 0;
     } else {
         // Leaf node; create the object here
         auto name = std::string(path);
-        auto ret = object_[name];
-        return std::dynamic_pointer_cast<T>(ret);
+        auto ent = object_[name];
+        return ent.cast<T>();
     }
 };
 

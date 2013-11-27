@@ -23,11 +23,12 @@
 #ifndef JET2_COMMON_HPP
 #define JET2_COMMON_HPP
 
+#define NOMINMAX
+#include <coro/coro.hpp>
+#include <sfr/sfr.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
-#include <sfr/sfr.hpp>
-#include <coro/coro.hpp>
 #include <bullet/btBulletCollisionCommon.h>
 #include <bullet/btBulletDynamicsCommon.h>
 #include <sfr/sfr.hpp>
@@ -41,6 +42,7 @@
 #include <cassert>
 #include <cstdint>
 #include <iostream>
+#include <algorithm>
 #include <cmath>
 #include <initializer_list>
 

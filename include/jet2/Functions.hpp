@@ -28,6 +28,7 @@ namespace jet2 {
 
 std::string readFile(std::string const& path);
 void screenSnapshot(std::string const& file);
-btVector3 boundingBox(Ptr<sfr::Transform> node);
+Ptr<btBoxShape> shapeFor(Ptr<sfr::Mesh> mesh);
+Ptr<btCompoundShape> shapeFor(Ptr<sfr::Transform> transform);
 
 }

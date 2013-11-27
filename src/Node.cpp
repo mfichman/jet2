@@ -22,8 +22,14 @@
 
 #include "jet2/Common.hpp"
 #include "jet2/Node.hpp"
+#include "jet2/Functions.hpp"
 
 namespace jet2 {
+
+Node::Node(Ptr<sfr::Transform> root) : 
+    shape_(shapeFor(root)),
+    body_(new btRigidBody(massFor(root), this, shape_.get())) {
+}
 
 void Node::getWorldTransform(btTransform& trans) const {
     auto pos = root()->position();

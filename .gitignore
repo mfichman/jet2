@@ -1,4 +1,11 @@
-
+*.pyc
+*.pdb
+readme.txt
+*.sdf
+*.suo
+*.vcxproj
+*.filters
+*.user
 *.pdb 
 *.exe
 *.obj

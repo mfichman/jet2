@@ -27,8 +27,8 @@
 using namespace jet2;
 
 int main() {
-    auto db = std::make_shared<Table>("db");
-    auto foo = db->objectIs<Code>("lib/foo");
+    auto db = std::make_shared<Table>();
+    auto foo = db->objectIs<Code>("lib/foo", "lib/foo");
     
     foo->unload();
     foo->reload();

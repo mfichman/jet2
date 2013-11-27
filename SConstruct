@@ -6,11 +6,10 @@ class Jet2(pkgboot.Package):
     includes = [
         '/usr/local/include/bullet',
     ]
-    winlibs = [
-        'glew32s.lib',
-        'opengl32',
-    ]
     libs = [
+        pkgboot.Lib('glew32s', 'win32'),
+        pkgboot.Lib('opengl32', 'win32'),
+        pkgboot.Lib('ws2_32', 'win32'),
         'sfml-audio',
         'sfml-graphics',
         'sfml-network',
@@ -37,6 +36,5 @@ class Jet2(pkgboot.Package):
             self.env.Depends(code, self.pch)
             name = code.name.replace('.cpp', '').lower()
             lib = self.env.SharedLibrary('lib/%s' % name, (code, self.lib))
-
 
 Jet2()
