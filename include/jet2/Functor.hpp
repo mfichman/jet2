@@ -64,6 +64,12 @@ public:
         in.resize(len);
     }
 
+    template <typename V>
+    typename std::enable_if<!std::is_scalar<V>::value>::type
+    val(V& in) {
+        visit(shared_from_this(), in);
+    }
+
     template <typename V, typename ...Arg>
     void
     vals(V& head, Arg&...arg) {
@@ -102,6 +108,14 @@ private:
     }
     Ptr<T> fd_;
 };
+
+inline void visit(Ptr<Functor> fn, sfr::Vector& val) {
+    fn->vals(val.x, val.y, val.z);
+}
+
+inline void visit(Ptr<Functor> fn, sfr::Quaternion& val) {
+    fn->vals(val.x, val.y, val.z, val.w);
+}
 
 
 }

@@ -20,46 +20,33 @@
  * IN THE SOFTWARE.
  */
 
-#ifndef JET2_COMMON_HPP
-#define JET2_COMMON_HPP
+#pragma once
 
-#define NOMINMAX
-#include <coro/coro.hpp>
-#include <sfr/sfr.hpp>
-#include <SFML/Window.hpp>
-#include <SFML/Audio.hpp>
-#include <SFML/Graphics.hpp>
-#include <bullet/btBulletCollisionCommon.h>
-#include <bullet/btBulletDynamicsCommon.h>
-#include <sfr/sfr.hpp>
-#include <fstream>
-#include <string>
-#include <functional>
-#include <vector>
-#include <unordered_map>
-#include <memory>
-#include <map>
-#include <cassert>
-#include <cstdint>
-#include <iostream>
-#include <algorithm>
-#include <cmath>
-#include <initializer_list>
-
-#ifndef _WIN32
-#include <dlfcn.h>
-#endif
+#include "jet2/Common.hpp"
+#include "jet2/Object.hpp"
+#include "jet2/Functor.hpp"
 
 namespace jet2 {
-class Code;
-class Table;
-class Exception;
-class Object;
-class Functor;
 
-template <typename T>
-using Ptr = std::shared_ptr<T>;
+class Node : public virtual btMotionState, public Object {
+public:
+    Node(Ptr<sfr::Transform> root, btScalar mass);
+    virtual ~Node() {};
+    void getWorldTransform(btTransform& trans) const;
+    void setWorldTransform(btTransform const& trans);
 
-}
+    Ptr<btRigidBody> body() const { return body_; }
+    Ptr<btCompoundShape> shape() const { return shape_; }
 
-#endif
+    AttrConst<Ptr<sfr::Transform>> root;
+    Attr<sfr::Vector> position;
+    Attr<sfr::Quaternion> rotation;
+
+    SERIALIZED(position, rotation);
+
+private:
+    Ptr<btRigidBody> body_;
+    Ptr<btCompoundShape> shape_;
+};
+
+};

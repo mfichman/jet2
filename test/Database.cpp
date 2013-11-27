@@ -27,12 +27,12 @@ using namespace jet2;
 
 class DataStruct : public Object {
 public:
-    DataStruct(std::string const& name, int test) : Object(name) {}
+    DataStruct(int test) {}
 
 };
 
 int main() {
-    auto db = std::make_shared<Table>("db");
+    auto db = std::make_shared<Table>();
 
     db->objectIs<DataStruct>("foo/bar/baz", 0);
 

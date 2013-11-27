@@ -33,10 +33,10 @@ class Object : public std::enable_shared_from_this<Object> {
 public:
     enum SyncMode { ALWAYS, ONCE, DISABLED };
 
-    Object(std::string const& name) : name(name) {}
+    Object() {}
     virtual ~Object() {}
+    virtual void visit(Ptr<Functor> func) {}
 
-    AttrConst<std::string> name;
     Attr<SyncMode> syncMode; 
 };
 

@@ -26,7 +26,9 @@
 
 namespace jet2 {
 
-std::string read_file(std::string const& path);
-void screen_snapshot(std::string const& file);
+std::string readFile(std::string const& path);
+void screenSnapshot(std::string const& file);
+Ptr<btBoxShape> shapeFor(Ptr<sfr::Mesh> mesh);
+Ptr<btCompoundShape> shapeFor(Ptr<sfr::Transform> transform);
 
 }

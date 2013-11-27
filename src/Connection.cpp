@@ -20,46 +20,19 @@
  * IN THE SOFTWARE.
  */
 
-#ifndef JET2_COMMON_HPP
-#define JET2_COMMON_HPP
-
-#define NOMINMAX
-#include <coro/coro.hpp>
-#include <sfr/sfr.hpp>
-#include <SFML/Window.hpp>
-#include <SFML/Audio.hpp>
-#include <SFML/Graphics.hpp>
-#include <bullet/btBulletCollisionCommon.h>
-#include <bullet/btBulletDynamicsCommon.h>
-#include <sfr/sfr.hpp>
-#include <fstream>
-#include <string>
-#include <functional>
-#include <vector>
-#include <unordered_map>
-#include <memory>
-#include <map>
-#include <cassert>
-#include <cstdint>
-#include <iostream>
-#include <algorithm>
-#include <cmath>
-#include <initializer_list>
-
-#ifndef _WIN32
-#include <dlfcn.h>
-#endif
+#include "jet2/Common.hpp"
+#include "jet2/Connection.hpp"
 
 namespace jet2 {
-class Code;
-class Table;
-class Exception;
-class Object;
-class Functor;
 
-template <typename T>
-using Ptr = std::shared_ptr<T>;
+Connection::Connection(std::string const& name, Ptr<coro::Socket> sd) :
+    name(name),
+    sd(sd),
+    writer(std::make_shared<Writer<coro::Socket>>(sd)),
+    reader(std::make_shared<Reader<coro::Socket>>(sd)),
+    out(Ptr<Functor>(new WriteFunctor<Writer<coro::Socket>>(writer()))),
+    in(Ptr<Functor>(new ReadFunctor<Reader<coro::Socket>>(reader()))) {
 
 }
 
-#endif
+}

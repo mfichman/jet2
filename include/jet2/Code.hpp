@@ -49,6 +49,7 @@ public:
     void unload();
     void load();
 
+    AttrConst<std::string> name;
     Attr<CodeStatus> status = CodeStatus::UNLOADED;
 #ifdef _WIN32
     Attr<HMODULE> handle = nullptr; 

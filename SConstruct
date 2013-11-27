@@ -6,11 +6,10 @@ class Jet2(pkgboot.Package):
     includes = [
         '/usr/local/include/bullet',
     ]
-    winlibs = [
-        'glew32s.lib',
-        'opengl32',
-    ]
     libs = [
+        pkgboot.Lib('glew32s', 'win32'),
+        pkgboot.Lib('opengl32', 'win32'),
+        pkgboot.Lib('ws2_32', 'win32'),
         'sfml-audio',
         'sfml-graphics',
         'sfml-network',
@@ -18,10 +17,11 @@ class Jet2(pkgboot.Package):
         'sfml-window',
         'sfr',
         'coro',
-        #'BulletCollision',
-        #'BulletDynamics',
-        #'BulletMultiThreaded',
-        #'BulletSoftBody',
+        'BulletMultiThreaded',
+        'BulletSoftBody',
+        'BulletDynamics',
+        'BulletCollision',
+        'LinearMath',
     ]
     frameworks = [
         'OpenGL',

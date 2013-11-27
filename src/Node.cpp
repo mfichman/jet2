@@ -20,46 +20,31 @@
  * IN THE SOFTWARE.
  */
 
-#ifndef JET2_COMMON_HPP
-#define JET2_COMMON_HPP
-
-#define NOMINMAX
-#include <coro/coro.hpp>
-#include <sfr/sfr.hpp>
-#include <SFML/Window.hpp>
-#include <SFML/Audio.hpp>
-#include <SFML/Graphics.hpp>
-#include <bullet/btBulletCollisionCommon.h>
-#include <bullet/btBulletDynamicsCommon.h>
-#include <sfr/sfr.hpp>
-#include <fstream>
-#include <string>
-#include <functional>
-#include <vector>
-#include <unordered_map>
-#include <memory>
-#include <map>
-#include <cassert>
-#include <cstdint>
-#include <iostream>
-#include <algorithm>
-#include <cmath>
-#include <initializer_list>
-
-#ifndef _WIN32
-#include <dlfcn.h>
-#endif
+#include "jet2/Common.hpp"
+#include "jet2/Node.hpp"
+#include "jet2/Functions.hpp"
 
 namespace jet2 {
-class Code;
-class Table;
-class Exception;
-class Object;
-class Functor;
 
-template <typename T>
-using Ptr = std::shared_ptr<T>;
-
+Node::Node(Ptr<sfr::Transform> root) : 
+    shape_(shapeFor(root)),
+    body_(new btRigidBody(massFor(root), this, shape_.get())) {
 }
 
-#endif
+void Node::getWorldTransform(btTransform& trans) const {
+    auto pos = root()->position();
+    auto rotation = root()->rotation();
+    auto btq = btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w);
+    auto btv = btVector3(pos.x, pos.y, pos.z);
+    trans = btTransform(btq, btv);
+}
+
+void Node::setWorldTransform(btTransform const& trans) {
+    auto pos = trans.getOrigin();
+    auto rotation = trans.getRotation();
+    auto sfrq = sfr::Quaternion(rotation.x(), rotation.y(), rotation.z(), rotation.w());
+    auto sfrv = sfr::Vector(pos.x(), pos.y(), pos.z());
+    root()->transformIs(sfr::Matrix(sfrq, sfrv));
+}
+
+}
