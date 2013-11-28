@@ -29,10 +29,13 @@ namespace jet2 {
 void init();
 void run();
 void exit();
+void step();
 
 extern Ptr<Table> const db;
 extern Ptr<sfr::AssetTable> const assets;
 extern Ptr<sfr::World> const scene;
 extern Ptr<btDiscreteDynamicsWorld> const world;
+extern Ptr<sf::Window> window;
+
 
 }

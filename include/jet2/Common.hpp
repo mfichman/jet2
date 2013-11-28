@@ -33,6 +33,7 @@
 #include <bullet/btBulletDynamicsCommon.h>
 #include <sfr/sfr.hpp>
 #include <fstream>
+#include <algorithm>
 #include <string>
 #include <functional>
 #include <vector>

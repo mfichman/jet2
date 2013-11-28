@@ -73,15 +73,16 @@ Ptr<btBoxShape> shapeFor(Ptr<sfr::Mesh> mesh) {
 Ptr<btCompoundShape> shapeFor(Ptr<sfr::Transform> node) {
 // Recursively build a btCompoundShape made up of the individual bounding boxes
 // for each sub-mesh/subtransform of the sfr::Transform.
-    auto shape = db->object<btCompoundShape>(node->name());
+    auto shape = db->object<btCompoundShape>("shapes/"+node->name());
     if (!shape) {
-        shape = db->objectIs<btCompoundShape>(node->name());
-        ShapeBuilder(shape, node);
+        shape = db->objectIs<btCompoundShape>("shapes/"+node->name());
+        auto sb = std::make_shared<ShapeBuilder>(shape);
+        sb->operator()(node);
     }
     return shape;
 }
 
-btScalar massFor(Ptr<sfr::Transform> node, btScalar) {
+btScalar massFor(Ptr<sfr::Transform> node, btScalar density) {
 // Recursively compute the mass of the node using a uniform density and the
 // total volume of the mesh bounding boxes nested within the node.
     return 1.;

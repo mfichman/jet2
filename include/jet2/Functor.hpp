@@ -28,7 +28,7 @@
 namespace jet2 {
 
 #define SERIALIZED(...) \
-    void visit(Ptr<Functor> out) { \
+    void visit(Ptr<jet2::Functor> out) { \
         out->vals(__VA_ARGS__);\
     }
 

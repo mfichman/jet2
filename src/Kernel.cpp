@@ -47,6 +47,7 @@ Ptr<btCollisionDispatcher> const dispatcher(new btCollisionDispatcher(collisionC
 Ptr<btDbvtBroadphase> const broadphase(new btDbvtBroadphase());
 Ptr<btSequentialImpulseConstraintSolver> const solver(new btSequentialImpulseConstraintSolver());
 Ptr<btDiscreteDynamicsWorld> const world(new btDiscreteDynamicsWorld(dispatcher.get(), broadphase.get(), solver.get(), collisionConfig.get()));
+Ptr<coro::Event> const stepEvent(new coro::Event);
 
 Ptr<Table> const db = std::make_shared<Table>();
 
@@ -131,15 +132,21 @@ void render(sf::Time const& delta) {
 
 void physics(sf::Time const& delta) {
     world->stepSimulation(delta.asSeconds(), 4, btScalar(1.)/btScalar(120.));
+    stepEvent->notifyAll();
 }
 
 void exit() {
 }
 
+void step() {
+    // Wait for the physics step event
+    stepEvent->wait();
+}
+
 void run() {
+    auto cphysics = coro::start(std::bind(task, physics, 120));
     auto crender = coro::start(std::bind(task, render, 60));
     auto cinput = coro::start(std::bind(task, input, 120));
-    auto cphysics = coro::start(std::bind(task, physics, 120));
     //coro::start(std::bind(task, sync, 120));
     // Run at 120 Hz for better response time
     coro::run();

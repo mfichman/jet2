@@ -30,5 +30,6 @@ std::string readFile(std::string const& path);
 void screenSnapshot(std::string const& file);
 Ptr<btBoxShape> shapeFor(Ptr<sfr::Mesh> mesh);
 Ptr<btCompoundShape> shapeFor(Ptr<sfr::Transform> transform);
+btScalar massFor(Ptr<sfr::Transform> transform, btScalar density=1.);
 
 }

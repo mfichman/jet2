@@ -26,13 +26,12 @@
 
 namespace jet2 {
 
-ShapeBuilder::ShapeBuilder(Ptr<btCompoundShape> shape, Ptr<sfr::Transform> node) {
+ShapeBuilder::ShapeBuilder(Ptr<btCompoundShape> shape) {
 // Create a new builder to build a compound shape from the scene-subgraph
 // starting at 'node'.  Usually, an OBJ file is loaded in as a node containing
 // multiple Mesh objects.  For each Mesh object, generate a btBoxShape using
 // the Mesh's bounding box.
     shape_ = shape;
-    operator()(node);
 }
 
 void ShapeBuilder::operator()(Ptr<sfr::Transform> transform) {

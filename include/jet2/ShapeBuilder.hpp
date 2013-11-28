@@ -30,7 +30,7 @@ class ShapeBuilder : public sfr::Node::Functor {
 // Recursively build a btCompoundShape made up of the individual bounding boxes
 // for each sub-mesh/subtransform of the sfr::Transform.
 public:
-    ShapeBuilder(Ptr<btCompoundShape> shape, Ptr<sfr::Transform> node); 
+    ShapeBuilder(Ptr<btCompoundShape> shape); 
     void operator()(Ptr<sfr::Transform> node);
     void operator()(Ptr<sfr::Model> node);
     void operator()(Ptr<sfr::Mesh> node);

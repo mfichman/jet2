@@ -124,14 +124,20 @@ Ptr<T> Table::object(char const* path) {
         //  012/   3-0 = 3 len
         auto len = ptr - path;
         auto name = std::string(path, len);
-        auto ent = object_[name];
-        auto table = ent.cast<Table>();
+        auto ent = object_.find(name);
+        if (ent == object_.end()) {
+            return 0;
+        }
+        auto table = ent->second.cast<Table>();
         return table ? table->object<T>(ptr+1) : 0;
     } else {
         // Leaf node; create the object here
         auto name = std::string(path);
-        auto ent = object_[name];
-        return ent.cast<T>();
+        auto ent = object_.find(name);
+        if (ent == object_.end()) {
+            return 0;
+        }
+        return ent->second.cast<T>();
     }
 };
 

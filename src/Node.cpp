@@ -23,18 +23,36 @@
 #include "jet2/Common.hpp"
 #include "jet2/Node.hpp"
 #include "jet2/Functions.hpp"
+#include "jet2/Kernel.hpp"
 
 namespace jet2 {
 
-Node::Node(Ptr<sfr::Transform> root) : 
-    shape_(shapeFor(root)),
-    body_(new btRigidBody(massFor(root), this, shape_.get())) {
+Node::Node(std::string const& name, Ptr<sfr::Transform> root) : 
+    node(scene->root()->childIs<sfr::Transform>(name)),
+    mass(massFor(root)),
+    shape_(shapeFor(root)) {
+
+    body_.reset(new btRigidBody(mass(), this, shape_.get(), btVector3(0, 1, 0)));
+    body_->setUserPointer(this);
+    body_->setSleepingThresholds(0.03f, 0.01f);
+    world->addRigidBody(body_.get());
+    node()->childIs(root);
+}
+
+Node::~Node() {
+    world->removeCollisionObject(body_.get());
+    scene->root()->childDel(node());
+
 }
 
 void Node::getWorldTransform(btTransform& trans) const {
-    auto pos = root()->position();
-    auto rotation = root()->rotation();
-    auto btq = btQuaternion(rotation.x, rotation.y, rotation.z, rotation.w);
+    auto pos = node()->position();
+    auto rotation = node()->rotation();
+    auto btq = btQuaternion();
+    btq.setX(rotation.x);
+    btq.setY(rotation.y);
+    btq.setZ(rotation.z);
+    btq.setW(rotation.w);
     auto btv = btVector3(pos.x, pos.y, pos.z);
     trans = btTransform(btq, btv);
 }
@@ -42,9 +60,13 @@ void Node::getWorldTransform(btTransform& trans) const {
 void Node::setWorldTransform(btTransform const& trans) {
     auto pos = trans.getOrigin();
     auto rotation = trans.getRotation();
-    auto sfrq = sfr::Quaternion(rotation.x(), rotation.y(), rotation.z(), rotation.w());
+    auto sfrq = sfr::Quaternion(rotation.w(), rotation.x(), rotation.y(), rotation.z());
     auto sfrv = sfr::Vector(pos.x(), pos.y(), pos.z());
-    root()->transformIs(sfr::Matrix(sfrq, sfrv));
+    auto matrix = sfr::Matrix(sfrq, sfrv);
+    if (matrix != node()->transform()) {
+        syncMode = ONCE;
+        node()->transformIs(matrix);
+    }
 }
 
 }

@@ -32,3 +32,4 @@
 #include "jet2/Hash.hpp"
 #include "jet2/Object.hpp"
 #include "jet2/Kernel.hpp"
+#include "jet2/Node.hpp"
