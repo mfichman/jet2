@@ -125,7 +125,7 @@ void render(sf::Time const& delta) {
     updater->operator()(scene); 
     shadowRenderer->operator()(scene);
     deferredRenderer->operator()(scene);
-    boundsRenderer->operator()(scene);
+    //boundsRenderer->operator()(scene);
 
     window->display(); 
 }

@@ -67,6 +67,7 @@ void Node::setWorldTransform(btTransform const& trans) {
         syncMode = ONCE;
         node()->transformIs(matrix);
     }
+    printf("%s %f %f %f\n", node()->name().c_str(), pos.x(), pos.y(), pos.z());
 }
 
 }
