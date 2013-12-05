@@ -57,6 +57,8 @@ class Table;
 class Exception;
 class Object;
 class Functor;
+class Model;
+class Controller;
 
 template <typename T>
 using Ptr = std::shared_ptr<T>;

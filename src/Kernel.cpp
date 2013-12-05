@@ -24,6 +24,7 @@
 #include "jet2/Table.hpp"
 #include "jet2/Kernel.hpp"
 #include "jet2/Connection.hpp"
+#include "jet2/Model.hpp"
 
 namespace jet2 {
 
@@ -99,11 +100,11 @@ void sync(sf::Time const& delta) {
         auto conn = ent.second.cast<Connection>();
         if (!conn) { continue; }
         for (auto obj : *db->object<Table>("data")) {
-            auto data = ent.second.cast<Object>();
-            if (data->syncMode()==Object::DISABLED) { continue; }
+            auto data = ent.second.cast<Model>();
+            if (data->syncMode()==Model::DISABLED) { continue; }
             conn->out()->val(data);
-            if (data->syncMode()==Object::ONCE) {
-                data->syncMode = Object::DISABLED;
+            if (data->syncMode()==Model::ONCE) {
+                data->syncMode = Model::DISABLED;
             }
         }
     }
@@ -125,7 +126,7 @@ void render(sf::Time const& delta) {
     updater->operator()(scene); 
     shadowRenderer->operator()(scene);
     deferredRenderer->operator()(scene);
-    //boundsRenderer->operator()(scene);
+   // boundsRenderer->operator()(scene);
 
     window->display(); 
 }

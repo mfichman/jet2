@@ -23,18 +23,29 @@
 #pragma once
 
 #include "jet2/Common.hpp"
-#include "jet2/Attr.hpp"
+#include "jet2/Object.hpp"
+#include "jet2/Functor.hpp"
+#include "jet2/Model.hpp"
 
 namespace jet2 {
 
-class Object : public std::enable_shared_from_this<Object> {
-// A game object or resource.  Objects are identified by their long path name,
-// so that clients can look them up.
+class Controller : private virtual btMotionState, public Object {
 public:
-    Object() {}
-    virtual ~Object() {}
-    virtual void visit(Ptr<Functor> func) {}
+    Controller(Ptr<Model> model, Ptr<sfr::Transform> root);
+    virtual ~Controller();
+    void getWorldTransform(btTransform& trans) const;
+    void setWorldTransform(btTransform const& trans);
+
+    Ptr<btRigidBody> body() const { return body_; }
+    Ptr<btCompoundShape> shape() const { return shape_; }
+    Ptr<Model> model() const { return model_; }
+    btScalar mass() const { return mass_; }
+
+private:
+    btScalar mass_;
+    Ptr<Model> model_;
+    Ptr<btCompoundShape> shape_;
+    Ptr<btRigidBody> body_;
 };
 
 }
-

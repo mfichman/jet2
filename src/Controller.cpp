@@ -21,33 +21,32 @@
  */
 
 #include "jet2/Common.hpp"
-#include "jet2/Node.hpp"
+#include "jet2/Controller.hpp"
 #include "jet2/Functions.hpp"
 #include "jet2/Kernel.hpp"
 
 namespace jet2 {
 
-Node::Node(std::string const& name, Ptr<sfr::Transform> root) : 
-    node(scene->root()->childIs<sfr::Transform>(name)),
-    mass(massFor(root)),
-    shape_(shapeFor(root)) {
+Controller::Controller(Ptr<Model> model, Ptr<sfr::Transform> root) {
+    mass_ = massFor(root);
+    model_ = model;
+    shape_ = shapeFor(root);
 
-    body_.reset(new btRigidBody(mass(), this, shape_.get(), btVector3(0, 1, 0)));
+    body_.reset(new btRigidBody(mass_, this, shape_.get(), btVector3(0, 1, 0)));
     body_->setUserPointer(this);
     body_->setSleepingThresholds(0.03f, 0.01f);
     world->addRigidBody(body_.get());
-    node()->childIs(root);
+    //node()->childIs(root);
 }
 
-Node::~Node() {
+Controller::~Controller() {
     world->removeCollisionObject(body_.get());
-    scene->root()->childDel(node());
-
+    //scene->root()->childDel(node());
 }
 
-void Node::getWorldTransform(btTransform& trans) const {
-    auto pos = node()->position();
-    auto rotation = node()->rotation();
+void Controller::getWorldTransform(btTransform& trans) const {
+    auto pos = model_->position();
+    auto rotation = model_->rotation();
     auto btq = btQuaternion();
     btq.setX(rotation.x);
     btq.setY(rotation.y);
@@ -57,17 +56,13 @@ void Node::getWorldTransform(btTransform& trans) const {
     trans = btTransform(btq, btv);
 }
 
-void Node::setWorldTransform(btTransform const& trans) {
+void Controller::setWorldTransform(btTransform const& trans) {
     auto pos = trans.getOrigin();
     auto rotation = trans.getRotation();
-    auto sfrq = sfr::Quaternion(rotation.w(), rotation.x(), rotation.y(), rotation.z());
     auto sfrv = sfr::Vector(pos.x(), pos.y(), pos.z());
-    auto matrix = sfr::Matrix(sfrq, sfrv);
-    if (matrix != node()->transform()) {
-        syncMode = ONCE;
-        node()->transformIs(matrix);
-    }
-    printf("%s %f %f %f\n", node()->name().c_str(), pos.x(), pos.y(), pos.z());
+    auto sfrq = sfr::Quaternion(rotation.w(), rotation.x(), rotation.y(), rotation.z());
+    model_->position = sfrv; 
+    model_->rotation = sfrq;
 }
 
 }

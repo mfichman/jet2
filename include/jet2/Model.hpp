@@ -28,26 +28,13 @@
 
 namespace jet2 {
 
-class Node : public virtual btMotionState, public Object {
+class Model : public Object {
 public:
-    Node(std::string const& name, Ptr<sfr::Transform> root);
-    virtual ~Node();
-    void getWorldTransform(btTransform& trans) const;
-    void setWorldTransform(btTransform const& trans);
+    enum SyncMode { ALWAYS, ONCE, DISABLED };
 
-    Ptr<btRigidBody> body() const { return body_; }
-    Ptr<btCompoundShape> shape() const { return shape_; }
-
-    AttrConst<Ptr<sfr::Transform>> node;
     Attr<sfr::Vector> position;
-    Attr<sfr::Quaternion> rotation;
-    Attr<float> mass;
-
-    SERIALIZED(position, rotation);
-
-private:
-    Ptr<btCompoundShape> shape_;
-    Ptr<btRigidBody> body_;
+    Attr<sfr::Quaternion> rotation;  
+    Attr<SyncMode> syncMode; 
 };
 
-};
+}
