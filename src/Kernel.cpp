@@ -41,6 +41,7 @@ Ptr<sfr::TransformUpdater> const updater(new sfr::TransformUpdater);
 Ptr<sfr::BoundsRenderer> boundsRenderer;
 Ptr<sfr::ShadowRenderer> shadowRenderer;
 Ptr<sfr::DeferredRenderer> deferredRenderer;
+Ptr<sfr::SkyboxRenderer> skyboxRenderer;
 
 // Physics
 Ptr<btDefaultCollisionConfiguration> const collisionConfig(new btDefaultCollisionConfiguration());
@@ -76,6 +77,7 @@ void init() {
     boundsRenderer = std::make_shared<sfr::BoundsRenderer>(assets);
     shadowRenderer = std::make_shared<sfr::ShadowRenderer>(assets);
     deferredRenderer = std::make_shared<sfr::DeferredRenderer>(assets);
+    skyboxRenderer = std::make_shared<sfr::SkyboxRenderer>(assets);
 }
 
 void task(void (*func)(sf::Time const&), uint64_t hz) {
@@ -123,9 +125,11 @@ void input(sf::Time const& delta) {
 
 void render(sf::Time const& delta) {
 // Render one frame of the scene, and display it. 
+    glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     updater->operator()(scene); 
     shadowRenderer->operator()(scene);
     deferredRenderer->operator()(scene);
+    skyboxRenderer->operator()(scene);
    // boundsRenderer->operator()(scene);
 
     window->display(); 
