@@ -42,6 +42,7 @@ Ptr<sfr::BoundsRenderer> boundsRenderer;
 Ptr<sfr::ShadowRenderer> shadowRenderer;
 Ptr<sfr::DeferredRenderer> deferredRenderer;
 Ptr<sfr::SkyboxRenderer> skyboxRenderer;
+Ptr<sfr::RibbonRenderer> ribbonRenderer;
 
 // Physics
 Ptr<btDefaultCollisionConfiguration> const collisionConfig(new btDefaultCollisionConfiguration());
@@ -78,6 +79,7 @@ void init() {
     shadowRenderer = std::make_shared<sfr::ShadowRenderer>(assets);
     deferredRenderer = std::make_shared<sfr::DeferredRenderer>(assets);
     skyboxRenderer = std::make_shared<sfr::SkyboxRenderer>(assets);
+    ribbonRenderer = std::make_shared<sfr::RibbonRenderer>(assets);
 }
 
 void task(void (*func)(sf::Time const&), uint64_t hz) {
@@ -130,6 +132,7 @@ void render(sf::Time const& delta) {
     shadowRenderer->operator()(scene);
     deferredRenderer->operator()(scene);
     skyboxRenderer->operator()(scene);
+    ribbonRenderer->operator()(scene);
    // boundsRenderer->operator()(scene);
 
     window->display(); 
