@@ -29,27 +29,20 @@
 
 namespace jet2 {
 
-class Controller : private virtual btMotionState, public Object {
+class View : public Object {
 public:
-    Controller(Ptr<Model> model, Ptr<sfr::Transform> root);
-    virtual ~Controller();
-    void getWorldTransform(btTransform& trans) const;
-    void setWorldTransform(btTransform const& trans);
-
-    Ptr<btRigidBody> body() const { return body_; }
-    Ptr<btCompoundShape> shape() const { return shape_; }
+    View(Ptr<Model> model);
+    virtual ~View();
     Ptr<Model> model() const { return model_; }
-    btScalar mass() const { return mass_; }
+    Ptr<sfr::Transform> node() const { return node_; }
     virtual void tick() {}
 
 private:
     void run();
 
-    btScalar mass_;
     Ptr<Model> model_;
-    Ptr<btCompoundShape> shape_;
-    Ptr<btRigidBody> body_;
+    Ptr<sfr::Transform> node_;
     Ptr<coro::Coroutine> coro_;
 };
 
-}
+};

@@ -43,6 +43,7 @@ Ptr<sfr::ShadowRenderer> shadowRenderer;
 Ptr<sfr::DeferredRenderer> deferredRenderer;
 Ptr<sfr::SkyboxRenderer> skyboxRenderer;
 Ptr<sfr::RibbonRenderer> ribbonRenderer;
+Ptr<sfr::BillboardRenderer> billboardRenderer;
 
 // Physics
 Ptr<btDefaultCollisionConfiguration> const collisionConfig(new btDefaultCollisionConfiguration());
@@ -54,11 +55,20 @@ Ptr<coro::Event> const stepEvent(new coro::Event);
 
 Ptr<Table> const db = std::make_shared<Table>();
 
+void tick(btDynamicsWorld* world, btScalar timeStep) {
+    world->clearForces();
+    stepEvent->notifyAll();
+    coro::yield();
+}
+
 void init() {
 // Initialize the renderers, asset loaders, database, etc.
     sf::ContextSettings settings(32, 0, 0, 3, 2);
+//    sf::VideoMode mode(1920, 1200);
+//    window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Fullscreen, settings);
     sf::VideoMode mode(1200, 800);
     window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Default, settings);
+    window->setVerticalSyncEnabled(true);
 
     settings = window->getSettings();
     if (settings.majorVersion < 3 || (settings.majorVersion == 3 && settings.minorVersion < 2)) {
@@ -80,6 +90,9 @@ void init() {
     deferredRenderer = std::make_shared<sfr::DeferredRenderer>(assets);
     skyboxRenderer = std::make_shared<sfr::SkyboxRenderer>(assets);
     ribbonRenderer = std::make_shared<sfr::RibbonRenderer>(assets);
+    billboardRenderer = std::make_shared<sfr::BillboardRenderer>(assets);
+
+    world->setInternalTickCallback(tick, nullptr, true);
 }
 
 void task(void (*func)(sf::Time const&), uint64_t hz) {
@@ -133,14 +146,14 @@ void render(sf::Time const& delta) {
     deferredRenderer->operator()(scene);
     skyboxRenderer->operator()(scene);
     ribbonRenderer->operator()(scene);
+    billboardRenderer->operator()(scene);
    // boundsRenderer->operator()(scene);
 
     window->display(); 
 }
 
 void physics(sf::Time const& delta) {
-    world->stepSimulation(delta.asSeconds(), 4, btScalar(1.)/btScalar(120.));
-    stepEvent->notifyAll();
+    world->stepSimulation(delta.asSeconds(), 8, btScalar(1.)/btScalar(60.));
 }
 
 void exit() {
@@ -152,9 +165,9 @@ void step() {
 }
 
 void run() {
-    auto cphysics = coro::start(std::bind(task, physics, 120));
+    auto cphysics = coro::start(std::bind(task, physics, 60));
     auto crender = coro::start(std::bind(task, render, 60));
-    auto cinput = coro::start(std::bind(task, input, 120));
+    auto cinput = coro::start(std::bind(task, input, 60));
     //coro::start(std::bind(task, sync, 120));
     // Run at 120 Hz for better response time
     coro::run();

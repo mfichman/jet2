@@ -59,6 +59,7 @@ class Object;
 class Functor;
 class Model;
 class Controller;
+class Timer;
 
 template <typename T>
 using Ptr = std::shared_ptr<T>;

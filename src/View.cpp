@@ -21,54 +21,29 @@
  */
 
 #include "jet2/Common.hpp"
-#include "jet2/Controller.hpp"
+#include "jet2/View.hpp"
 #include "jet2/Functions.hpp"
 #include "jet2/Kernel.hpp"
 
 namespace jet2 {
 
-Controller::Controller(Ptr<Model> model, Ptr<sfr::Transform> root) {
-    mass_ = massFor(root);
+View::View(Ptr<Model> model) {
+    node_ = jet2::scene->root()->childIs<sfr::Transform>("");
     model_ = model;
-    shape_ = shapeFor(root);
-
-    body_.reset(new btRigidBody(mass_, this, shape_.get(), btVector3(0, 1, 0)));
-    body_->setUserPointer(this);
-    body_->setSleepingThresholds(0.03f, 0.01f);
-    world->addRigidBody(body_.get());
     coro_ = coro::start([this]() { run(); });
 }
 
-Controller::~Controller() {
-    world->removeCollisionObject(body_.get());
+View::~View() {
+    jet2::scene->root()->childDel(node_);
 }
 
-void Controller::run() {
+void View::run() {
     while (true) {
+        node_->positionIs(model_->position());
+        node_->rotationIs(model_->rotation());
         tick();
         jet2::step();
     }
-}
-
-void Controller::getWorldTransform(btTransform& trans) const {
-    auto pos = model_->position();
-    auto rotation = model_->rotation();
-    auto btq = btQuaternion();
-    btq.setX(rotation.x);
-    btq.setY(rotation.y);
-    btq.setZ(rotation.z);
-    btq.setW(rotation.w);
-    auto btv = btVector3(pos.x, pos.y, pos.z);
-    trans = btTransform(btq, btv);
-}
-
-void Controller::setWorldTransform(btTransform const& trans) {
-    auto pos = trans.getOrigin();
-    auto rotation = trans.getRotation();
-    auto sfrv = sfr::Vector(pos.x(), pos.y(), pos.z());
-    auto sfrq = sfr::Quaternion(rotation.w(), rotation.x(), rotation.y(), rotation.z());
-    model_->position = sfrv; 
-    model_->rotation = sfrq;
 }
 
 }
