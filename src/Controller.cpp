@@ -28,19 +28,23 @@
 namespace jet2 {
 
 Controller::Controller(Ptr<Model> model, Ptr<sfr::Transform> root) {
-    mass_ = massFor(root);
+    mass_ = root ? massFor(root) : 0;
     model_ = model;
-    shape_ = shapeFor(root);
+    shape_ = root ? shapeFor(root) : 0;
 
-    body_.reset(new btRigidBody(mass_, this, shape_.get(), btVector3(0, 1, 0)));
-    body_->setUserPointer(this);
-    body_->setSleepingThresholds(0.03f, 0.01f);
-    world->addRigidBody(body_.get());
+    if (shape_) {
+        body_.reset(new btRigidBody(mass_, this, shape_.get(), btVector3(0, 1, 0)));
+        body_->setUserPointer(this);
+        body_->setSleepingThresholds(0.03f, 0.01f);
+        world->addRigidBody(body_.get());
+    }
     coro_ = coro::start([this]() { run(); });
 }
 
 Controller::~Controller() {
-    world->removeCollisionObject(body_.get());
+    if (body_) {
+        world->removeCollisionObject(body_.get());
+    } 
 }
 
 void Controller::run() {

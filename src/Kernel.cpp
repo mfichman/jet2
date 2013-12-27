@@ -44,6 +44,7 @@ Ptr<sfr::DeferredRenderer> deferredRenderer;
 Ptr<sfr::SkyboxRenderer> skyboxRenderer;
 Ptr<sfr::RibbonRenderer> ribbonRenderer;
 Ptr<sfr::BillboardRenderer> billboardRenderer;
+Ptr<sfr::ParticleRenderer> particleRenderer;
 
 // Physics
 Ptr<btDefaultCollisionConfiguration> const collisionConfig(new btDefaultCollisionConfiguration());
@@ -91,21 +92,26 @@ void init() {
     skyboxRenderer = std::make_shared<sfr::SkyboxRenderer>(assets);
     ribbonRenderer = std::make_shared<sfr::RibbonRenderer>(assets);
     billboardRenderer = std::make_shared<sfr::BillboardRenderer>(assets);
+    particleRenderer = std::make_shared<sfr::ParticleRenderer>(assets);
 
     world->setInternalTickCallback(tick, nullptr, true);
 }
 
 void task(void (*func)(sf::Time const&), uint64_t hz) {
 // Invokes task function 'func' once per the interval given by 'rate'
-    auto interval = sf::seconds(1./(double)hz);
     auto clock = sf::Clock(); 
     while (true) {
         auto delta = clock.getElapsedTime();
         clock.restart();
         func(delta);
-        auto used = clock.getElapsedTime();
-        auto sleep = std::max(interval-used, sf::seconds(0));
-        coro::sleep(coro::Time::microsec(sleep.asMicroseconds()));
+        if (hz) {
+            auto used = clock.getElapsedTime();
+            auto interval = sf::seconds(1./(double)hz);
+            auto sleep = std::max(interval-used, sf::seconds(0));
+            coro::sleep(coro::Time::microsec(sleep.asMicroseconds()));
+        } else {
+            coro::yield();
+        }
     }
 }
 
@@ -145,8 +151,9 @@ void render(sf::Time const& delta) {
     shadowRenderer->operator()(scene);
     deferredRenderer->operator()(scene);
     skyboxRenderer->operator()(scene);
-    ribbonRenderer->operator()(scene);
     billboardRenderer->operator()(scene);
+    ribbonRenderer->operator()(scene);
+    particleRenderer->operator()(scene);
    // boundsRenderer->operator()(scene);
 
     window->display(); 
@@ -154,6 +161,12 @@ void render(sf::Time const& delta) {
 
 void physics(sf::Time const& delta) {
     world->stepSimulation(delta.asSeconds(), 8, btScalar(1.)/btScalar(60.));
+}
+
+void loop(sf::Time const& delta) {
+    input(delta);
+    physics(delta);
+    render(delta);
 }
 
 void exit() {
@@ -165,9 +178,7 @@ void step() {
 }
 
 void run() {
-    auto cphysics = coro::start(std::bind(task, physics, 60));
-    auto crender = coro::start(std::bind(task, render, 60));
-    auto cinput = coro::start(std::bind(task, input, 60));
+    auto cloop = coro::start(std::bind(task, loop, 60));
     //coro::start(std::bind(task, sync, 120));
     // Run at 120 Hz for better response time
     coro::run();
