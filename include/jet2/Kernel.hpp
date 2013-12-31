@@ -36,6 +36,7 @@ extern Ptr<sfr::AssetTable> const assets;
 extern Ptr<sfr::World> const scene;
 extern Ptr<btDiscreteDynamicsWorld> const world;
 extern Ptr<sf::Window> window;
+extern coro::Time const timestep;
 
 
 }

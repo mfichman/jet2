@@ -55,8 +55,9 @@ Ptr<btDiscreteDynamicsWorld> const world(new btDiscreteDynamicsWorld(dispatcher.
 Ptr<coro::Event> const stepEvent(new coro::Event);
 
 Ptr<Table> const db = std::make_shared<Table>();
+coro::Time const timestep = coro::Time::sec(1./60.);
 
-void tick(btDynamicsWorld* world, btScalar timeStep) {
+void tick(btDynamicsWorld* world, btScalar timestep) {
     world->clearForces();
     stepEvent->notifyAll();
     coro::yield();
@@ -160,7 +161,7 @@ void render(sf::Time const& delta) {
 }
 
 void physics(sf::Time const& delta) {
-    world->stepSimulation(delta.asSeconds(), 8, btScalar(1.)/btScalar(60.));
+    world->stepSimulation(delta.asSeconds(), 8, timestep.sec());
 }
 
 void loop(sf::Time const& delta) {

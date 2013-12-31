@@ -35,4 +35,5 @@
 #include "jet2/Controller.hpp"
 #include "jet2/Model.hpp"
 #include "jet2/View.hpp"
+#include "jet2/Accumulator.hpp"
 
