@@ -32,7 +32,9 @@ Controller::Controller(Ptr<Model> model, Ptr<sfr::Transform> root) {
     model_ = model;
     shape_ = shapeFor(root);
 
-    body_.reset(new btRigidBody(mass_, this, shape_.get(), btVector3(0, 1, 0)));
+    btVector3 localInertia;
+    shape_->calculateLocalInertia(mass_, localInertia);
+    body_.reset(new btRigidBody(mass_, this, shape_.get(), localInertia));
     body_->setUserPointer(this);
     body_->setSleepingThresholds(0.03f, 0.01f);
     world->addRigidBody(body_.get());
