@@ -32,6 +32,7 @@ class Model : public Object {
 public:
     enum SyncMode { ALWAYS, ONCE, DISABLED };
 
+    Attr<uint32_t> id;
     Attr<sfr::Vector> position;
     Attr<sfr::Quaternion> rotation;  
     Attr<SyncMode> syncMode; 
