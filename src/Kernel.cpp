@@ -34,10 +34,10 @@ Ptr<sf::Window> window;
 // Rendering
 Ptr<sfr::World> const scene(new sfr::World);
 Ptr<sfr::AssetTable> const assets(new sfr::AssetTable);
-Ptr<sfr::WavefrontLoader> const meshLoader(new sfr::WavefrontLoader(assets));
-Ptr<sfr::EffectLoader> const effectLoader(new sfr::EffectLoader(assets));
-Ptr<sfr::TextureLoader> const textureLoader(new sfr::TextureLoader(assets));
-Ptr<sfr::TransformUpdater> const updater(new sfr::TransformUpdater);
+Ptr<sfr::WavefrontLoader> meshLoader;
+Ptr<sfr::EffectLoader> effectLoader;
+Ptr<sfr::TextureLoader> textureLoader;
+Ptr<sfr::TransformUpdater> updater;
 Ptr<sfr::BoundsRenderer> boundsRenderer;
 Ptr<sfr::ShadowRenderer> shadowRenderer;
 Ptr<sfr::DeferredRenderer> deferredRenderer;
@@ -47,12 +47,12 @@ Ptr<sfr::BillboardRenderer> billboardRenderer;
 Ptr<sfr::ParticleRenderer> particleRenderer;
 
 // Physics
-Ptr<btDefaultCollisionConfiguration> const collisionConfig(new btDefaultCollisionConfiguration());
-Ptr<btCollisionDispatcher> const dispatcher(new btCollisionDispatcher(collisionConfig.get()));
-Ptr<btDbvtBroadphase> const broadphase(new btDbvtBroadphase());
-Ptr<btSequentialImpulseConstraintSolver> const solver(new btSequentialImpulseConstraintSolver());
-Ptr<btDiscreteDynamicsWorld> const world(new btDiscreteDynamicsWorld(dispatcher.get(), broadphase.get(), solver.get(), collisionConfig.get()));
-Ptr<coro::Event> const stepEvent(new coro::Event);
+Ptr<btDefaultCollisionConfiguration> collisionConfig;
+Ptr<btCollisionDispatcher> dispatcher;
+Ptr<btDbvtBroadphase> broadphase;
+Ptr<btSequentialImpulseConstraintSolver> solver;
+Ptr<btDiscreteDynamicsWorld> world;
+Ptr<coro::Event> stepEvent;
 
 Ptr<Table> const db = std::make_shared<Table>();
 coro::Time const timestep = coro::Time::sec(1./60.);
@@ -64,6 +64,18 @@ void tick(btDynamicsWorld* world, btScalar timestep) {
 }
 
 void init() {
+    meshLoader.reset(new sfr::WavefrontLoader(assets));
+    effectLoader.reset(new sfr::EffectLoader(assets));
+    textureLoader.reset(new sfr::TextureLoader(assets));
+    updater.reset(new sfr::TransformUpdater);
+
+    collisionConfig.reset(new btDefaultCollisionConfiguration());
+    dispatcher.reset(new btCollisionDispatcher(collisionConfig.get()));
+    broadphase.reset(new btDbvtBroadphase());
+    solver.reset(new btSequentialImpulseConstraintSolver());
+    world.reset(new btDiscreteDynamicsWorld(dispatcher.get(), broadphase.get(), solver.get(), collisionConfig.get()));
+    stepEvent.reset(new coro::Event);
+
 // Initialize the renderers, asset loaders, database, etc.
     sf::ContextSettings settings(32, 0, 0, 3, 2);
 //    sf::VideoMode mode(1920, 1200);
@@ -180,8 +192,8 @@ void step() {
 
 void run() {
     auto cloop = coro::start(std::bind(task, loop, 60));
-    //coro::start(std::bind(task, sync, 120));
-    // Run at 120 Hz for better response time
+    //coro::start(std::bind(task, sync, 60));
+    // Run at 60 Hz for better response time
     coro::run();
 }
 

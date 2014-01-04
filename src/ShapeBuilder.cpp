@@ -64,6 +64,8 @@ void ShapeBuilder::operator()(Ptr<sfr::Mesh> node) {
     auto btrot = btQuaternion(rot.x, rot.y, rot.z, rot.w);
     auto bttransform = btTransform(btrot, btpos);
     shape_->addChildShape(bttransform, shape.get());
+    std::cout << transform.origin() << std::endl;
+    std::cout << transform.rotation() << std::endl;
 }
 
 }
