@@ -78,10 +78,10 @@ void init() {
 
 // Initialize the renderers, asset loaders, database, etc.
     sf::ContextSettings settings(32, 0, 0, 3, 2);
-//    sf::VideoMode mode(1920, 1200);
-//    window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Fullscreen, settings);
-    sf::VideoMode mode(1200, 800);
-    window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Default, settings);
+    sf::VideoMode mode(1920, 1200);
+    window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Fullscreen, settings);
+//    sf::VideoMode mode(1200, 800);
+//    window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Default, settings);
     window->setVerticalSyncEnabled(true);
 
     settings = window->getSettings();
@@ -173,6 +173,7 @@ void render(sf::Time const& delta) {
 }
 
 void physics(sf::Time const& delta) {
+    std::cout << delta.asSeconds() << std::endl;
     world->stepSimulation(delta.asSeconds(), 8, timestep.sec());
 }
 
@@ -191,7 +192,7 @@ void step() {
 }
 
 void run() {
-    auto cloop = coro::start(std::bind(task, loop, 60));
+    auto cloop = coro::start(std::bind(task, loop, 120));
     //coro::start(std::bind(task, sync, 60));
     // Run at 60 Hz for better response time
     coro::run();
