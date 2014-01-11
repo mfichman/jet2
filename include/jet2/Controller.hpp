@@ -31,7 +31,7 @@ namespace jet2 {
 
 class Controller : private virtual btMotionState, public Object {
 public:
-    Controller(Ptr<Model> model, Ptr<sfr::Transform> root);
+    Controller(Ptr<Model> model, Ptr<sfr::Transform> root, bool kinematic=false);
     virtual ~Controller();
     void getWorldTransform(btTransform& trans) const;
     void setWorldTransform(btTransform const& trans);

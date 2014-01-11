@@ -45,6 +45,7 @@ Ptr<sfr::SkyboxRenderer> skyboxRenderer;
 Ptr<sfr::RibbonRenderer> ribbonRenderer;
 Ptr<sfr::BillboardRenderer> billboardRenderer;
 Ptr<sfr::ParticleRenderer> particleRenderer;
+Ptr<sfr::TransparencyRenderer> transparencyRenderer;
 
 // Physics
 Ptr<btDefaultCollisionConfiguration> collisionConfig;
@@ -78,10 +79,10 @@ void init() {
 
 // Initialize the renderers, asset loaders, database, etc.
     sf::ContextSettings settings(32, 0, 0, 3, 2);
-    sf::VideoMode mode(1920, 1200);
-    window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Fullscreen, settings);
-//    sf::VideoMode mode(1200, 800);
-//    window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Default, settings);
+//    sf::VideoMode mode(1920, 1200);
+//    window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Fullscreen, settings);
+    sf::VideoMode mode(1200, 800);
+    window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Default, settings);
     window->setVerticalSyncEnabled(true);
 
     settings = window->getSettings();
@@ -106,6 +107,7 @@ void init() {
     ribbonRenderer = std::make_shared<sfr::RibbonRenderer>(assets);
     billboardRenderer = std::make_shared<sfr::BillboardRenderer>(assets);
     particleRenderer = std::make_shared<sfr::ParticleRenderer>(assets);
+    transparencyRenderer = std::make_shared<sfr::TransparencyRenderer>(assets);
 
     world->setInternalTickCallback(tick, nullptr, true);
 }
@@ -151,14 +153,26 @@ void input(sf::Time const& delta) {
     sf::Event evt;
     while (window->pollEvent(evt)) {
         switch (evt.type) {
-        case sf::Event::Closed: ::exit(0); break;
-        default: break;
+        case sf::Event::Closed: 
+            std::cout << "close" << std::endl;
+            ::exit(0);
+            break;
+        case sf::Event::KeyPressed:
+            if (evt.key.code == sf::Keyboard::Escape) {
+                ::exit(0);
+            } else if (evt.key.code == sf::Keyboard::F4 && evt.key.alt) {
+                ::exit(0);
+            }
+            break;
+        default: 
+            break;
         }
     }
 }
 
 void render(sf::Time const& delta) {
 // Render one frame of the scene, and display it. 
+    glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     updater->operator()(scene); 
     shadowRenderer->operator()(scene);
@@ -167,6 +181,7 @@ void render(sf::Time const& delta) {
     billboardRenderer->operator()(scene);
     ribbonRenderer->operator()(scene);
     particleRenderer->operator()(scene);
+    transparencyRenderer->operator()(scene);
    // boundsRenderer->operator()(scene);
 
     window->display(); 
