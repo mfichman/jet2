@@ -27,8 +27,8 @@
 
 namespace jet2 {
 
-Controller::Controller(Ptr<Model> model, Ptr<sfr::Transform> root, bool kinematic) {
-    mass_ = kinematic ? 0 : (root ? massFor(root) : 0);
+Controller::Controller(Ptr<Model> model, Ptr<sfr::Transform> root) {
+    mass_ = (root ? massFor(root) : 0);
     model_ = model;
     shape_ = root ? shapeFor(root) : 0;
 
@@ -40,9 +40,6 @@ Controller::Controller(Ptr<Model> model, Ptr<sfr::Transform> root, bool kinemati
         body_->setSleepingThresholds(0.03f, 0.01f);
         body_->setActivationState(DISABLE_DEACTIVATION);
         world->addRigidBody(body_.get());
-    }
-    if (kinematic && shape_) {
-        body_->setCollisionFlags(btCollisionObject::CF_KINEMATIC_OBJECT);
     }
     coro_ = coro::start([this]() { run(); });
 }
