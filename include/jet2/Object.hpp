@@ -34,6 +34,7 @@ public:
     Object() {}
     virtual ~Object() {}
     virtual void visit(Ptr<Functor> func) {}
+    virtual void construct(Ptr<Functor> func) {}
 };
 
 }

@@ -32,6 +32,10 @@ namespace jet2 {
         out->vals(__VA_ARGS__);\
     }
 
+#define CONSTRUCT(...) \
+    void construct(Ptr<jet2::Functor> out) { \
+        out->vals(__VA_ARGS__);\
+    }
 
 class Functor : public std::enable_shared_from_this<Functor> {
 public:

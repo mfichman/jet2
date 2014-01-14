@@ -28,11 +28,19 @@
 
 namespace jet2 {
 
+typedef uint16_t ModelId;
+class ModelTable : public Object {
+public:
+    Hash<ModelId, Ptr<Model>> model;
+    Attr<ModelId> nextId = 0;
+};
+
 class Model : public Object {
 public:
     enum SyncMode { ALWAYS, ONCE, DISABLED };
+    enum SyncFlags { CONSTRUCT, SYNC };
 
-    Attr<uint32_t> id;
+    Attr<ModelId> id;
     Attr<sfr::Vector> position;
     Attr<sfr::Quaternion> rotation;  
     Attr<SyncMode> syncMode; 

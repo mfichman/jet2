@@ -60,6 +60,7 @@ class Functor;
 class Model;
 class Controller;
 class Timer;
+class Connection;
 
 template <typename T>
 using Ptr = std::shared_ptr<T>;

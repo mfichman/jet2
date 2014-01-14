@@ -25,8 +25,7 @@
 
 namespace jet2 {
 
-Connection::Connection(std::string const& name, Ptr<coro::Socket> sd) :
-    name(name),
+Connection::Connection(Ptr<coro::Socket> sd) :
     sd(sd),
     writer(std::make_shared<Writer<coro::Socket>>(sd)),
     reader(std::make_shared<Reader<coro::Socket>>(sd)),

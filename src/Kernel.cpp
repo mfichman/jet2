@@ -130,23 +130,87 @@ void task(void (*func)(sf::Time const&), uint64_t hz) {
     }
 }
 
+Ptr<ModelTable> modelTable(Ptr<Table> db) {
+// Create the model/model ID mapping.  The mapping must be identical for both
+// sides of the connection.
+    auto models = db->object<ModelTable>("mt");
+    if (models) { 
+        return models; 
+    }
+    models = db->objectIs<ModelTable>("mt");
+    for (auto entry : *db->object<Table>("models")) {
+        auto data = entry.second.cast<Model>();
+        if (data->id() == 0) {
+            models->nextId = models->nextId()+1;
+            data->id = models->nextId;
+        }
+        models->model(data->id(), data);
+    }
+    return models;
+}
 
-void sync(sf::Time const& delta) {
-// Update the network.  Find all outgoing connections, and broadcast any
-// updates to dirty objects.  
-    for (auto ent : *db->object<Table>("conn")) {
-        auto conn = ent.second.cast<Connection>();
-        if (!conn) { continue; }
-        for (auto obj : *db->object<Table>("data")) {
-            auto data = ent.second.cast<Model>();
-            if (data->syncMode()==Model::DISABLED) { continue; }
-            conn->out()->val(data);
-            if (data->syncMode()==Model::ONCE) {
-                data->syncMode = Model::DISABLED;
-            }
+void syncConnection(Ptr<Table> db, Ptr<Connection> conn) {
+// Synchronize one connection, by sending data for any dirty models.
+    for (auto entry : *db->object<Table>("models")) {
+        auto model = entry.second.cast<Model>();
+        if (model->id() == 0 || model->syncMode() == Model::DISABLED) { 
+            continue; 
+        }
+        conn->out()->val(model->id());
+        if (!conn->model(model->id())) {
+            uint8_t const flags = jet2::Model::CONSTRUCT;
+            conn->out()->val(flags);
+            model->construct(conn->out());
+            conn->model(model->id(), model);
+        } else {
+            uint8_t const flags = jet2::Model::SYNC;
+            conn->out()->val(flags);
+        }
+        conn->out()->val(model);
+        if (model->syncMode() == Model::ONCE) {
+            model->syncMode = Model::DISABLED;
         }
     }
+    conn->writer()->flush();
 }
+
+void syncTable(Ptr<Table> db) {
+// Update the network.  Find all outgoing connections, and broadcast any
+// updates to dirty objects.  
+    auto models = modelTable(db);
+    for (auto entry : *db->object<Table>("connections")) {
+        auto conn = entry.second.cast<Connection>();
+        if (!conn) { continue; }
+        syncConnection(db, conn);
+    }
+}
+
+void recvMessage(Ptr<Table> db, Ptr<Connection> conn) {
+// Receive one message from a connection.
+    auto modelId = ModelId(0);
+    conn->in()->val(modelId); 
+
+    auto flags = uint8_t(0);
+    conn->in()->val(flags); 
+
+    auto models = modelTable(db); 
+    auto model = models->model(modelId);
+    assert(model && "model not found");
+    if (flags == jet2::Model::CONSTRUCT) {
+        model->construct(conn->in());
+    }
+    conn->in()->val(model);
+}
+
+void recvConnection(Ptr<Table> db, Ptr<Connection> conn) {
+// Receive a stream of messages from a connection
+     
+}
+
+void sync(sf::Time const& delta) {
+    syncTable(db);
+}
+
 
 void input(sf::Time const& delta) {
 // Handle window input and dispatch it to any listeners.
@@ -154,7 +218,6 @@ void input(sf::Time const& delta) {
     while (window->pollEvent(evt)) {
         switch (evt.type) {
         case sf::Event::Closed: 
-            std::cout << "close" << std::endl;
             ::exit(0);
             break;
         case sf::Event::KeyPressed:

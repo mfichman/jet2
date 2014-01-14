@@ -26,29 +26,23 @@
 #include "jet2/Object.hpp"
 #include "jet2/Functor.hpp"
 #include "jet2/Attr.hpp"
+#include "jet2/Hash.hpp"
 #include "jet2/Reader.hpp"
+#include "jet2/Model.hpp"
 #include "jet2/Writer.hpp"
 
 namespace jet2 {
 
-class Message {
-public:
-    std::string name;    
-    Ptr<Object> obj;
-
-    //SERIALIZE(name, obj);
-};
-
 class Connection : public Object {
 public:
-    Connection(std::string const& name, Ptr<coro::Socket> sd);
+    Connection(Ptr<coro::Socket> sd);
 
-    AttrConst<std::string> name;
     AttrConst<Ptr<coro::Socket>> sd;
     AttrConst<Ptr<Writer<coro::Socket>>> writer;
     AttrConst<Ptr<Reader<coro::Socket>>> reader;
     AttrConst<Ptr<Functor>> out;
     AttrConst<Ptr<Functor>> in;
+    Hash<ModelId, Ptr<Model>> model;
 };
 
 }

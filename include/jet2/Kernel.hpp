@@ -38,5 +38,8 @@ extern Ptr<btDiscreteDynamicsWorld> world;
 extern Ptr<sf::Window> window;
 extern coro::Time const timestep;
 
+// Private
+void syncTable(Ptr<Table> db);
+void recvMessage(Ptr<Table> db, Ptr<Connection> conn);
 
 }

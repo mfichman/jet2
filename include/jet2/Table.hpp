@@ -35,12 +35,18 @@ class TableEntry {
 // the cast type.
 public:
     template <typename T>
-    TableEntry(Ptr<T> ptr) : object_(ptr), type_(typeid(T)) {}
+    TableEntry(Ptr<T> ptr, typename std::enable_if<!std::is_base_of<Object,T>::value,T>::type* dummy=0) : object_(ptr), type_(typeid(T)) {}
+    //TableEntry(Ptr<T> ptr) : object_(ptr), type_(typeid(T)) {}
+    TableEntry(Ptr<Object> ptr) : object_(ptr), type_(typeid(Object)) {}
     TableEntry() : type_(typeid(void)) {}
 
     template <typename T>
     Ptr<T> cast() {
-        return typeid(T) == type_ ? std::static_pointer_cast<T>(object_) : 0;
+        if (type_ == typeid(Object) && std::is_base_of<Object,T>::value) {
+            return std::dynamic_pointer_cast<T>(std::static_pointer_cast<Object>(object_));
+        } else {
+            return typeid(T) == type_ ? std::static_pointer_cast<T>(object_) : 0;
+        }
     }
     
     Ptr<void> ptr() { return object_; }
@@ -95,7 +101,7 @@ Ptr<T> Table::objectIs(char const* path, Arg const&... arg) {
         auto ent = object_.find(name);
         if (ent == object_.end()) {
             auto table = std::make_shared<Table>();
-            object_.insert(std::make_pair(name, table));
+            object_.insert(std::make_pair(name, TableEntry(table)));
             return table->objectIs<T>(ptr+1, arg...);
         } else {
             auto table = ent->second.cast<Table>();
@@ -108,14 +114,14 @@ Ptr<T> Table::objectIs(char const* path, Arg const&... arg) {
         auto ent = object_.find(name);
         assert(ent==object_.end()); // Object already exists
         auto obj = std::make_shared<T>(arg...);
-        object_.insert(std::make_pair(name, obj));
+        object_.insert(std::make_pair(name, TableEntry(obj)));
         return obj;
     }
 };
 
 template <typename T>
 Ptr<T> Table::object(char const* path) {
-    // Creates a new object if it doesn't already exist and returns it 
+    // Returns the object at the given path
     auto ptr = strchr(path, '/');
     assert(*path != '\0'); // String is empty
     assert(ptr != path); // String starts with a '/'
@@ -131,7 +137,7 @@ Ptr<T> Table::object(char const* path) {
         auto table = ent->second.cast<Table>();
         return table ? table->object<T>(ptr+1) : 0;
     } else {
-        // Leaf node; create the object here
+        // Leaf node; get object here
         auto name = std::string(path);
         auto ent = object_.find(name);
         if (ent == object_.end()) {
