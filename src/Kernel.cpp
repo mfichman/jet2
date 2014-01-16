@@ -25,6 +25,7 @@
 #include "jet2/Kernel.hpp"
 #include "jet2/Connection.hpp"
 #include "jet2/Model.hpp"
+#include "jet2/Controller.hpp"
 
 namespace jet2 {
 
@@ -59,7 +60,26 @@ Ptr<Table> const db = std::make_shared<Table>();
 coro::Time const timestep = coro::Time::sec(1./60.);
 
 void tick(btDynamicsWorld* world, btScalar timestep) {
+// Run a single collision tick.  Clear forces, notify controllers of any
+// collisions, and then notify any coroutines that are waiting on the tick
+// callback event.
     world->clearForces();
+
+    auto dispatcher = world->getDispatcher();
+    for (auto i = 0; i < dispatcher->getNumManifolds(); ++i) {
+        auto manifold = dispatcher->getManifoldByIndexInternal(i);
+        auto a = static_cast<btCollisionObject const*>(manifold->getBody0());
+        auto b = static_cast<btCollisionObject const*>(manifold->getBody1());
+        if (manifold->getNumContacts() > 0) {
+            auto ca = std::static_pointer_cast<Controller>(static_cast<Controller*>(a->getUserPointer())->shared_from_this());
+            auto cb = std::static_pointer_cast<Controller>(static_cast<Controller*>(b->getUserPointer())->shared_from_this());
+            auto pa = manifold->getContactPoint(0).getPositionWorldOnA();
+            auto pb = manifold->getContactPoint(0).getPositionWorldOnB();
+            ca->collision(cb, pa);
+            cb->collision(ca, pb);
+        }
+    }
+
     stepEvent->notifyAll();
     coro::yield();
 }
@@ -79,11 +99,12 @@ void init() {
 
 // Initialize the renderers, asset loaders, database, etc.
     sf::ContextSettings settings(32, 0, 0, 3, 2);
-//    sf::VideoMode mode(1920, 1200);
-//    window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Fullscreen, settings);
+  //  sf::VideoMode mode(1920, 1200);
+    //window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Fullscreen, settings);
     sf::VideoMode mode(1200, 800);
     window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Default, settings);
     window->setVerticalSyncEnabled(true);
+    window->setMouseCursorVisible(false);
 
     settings = window->getSettings();
     if (settings.majorVersion < 3 || (settings.majorVersion == 3 && settings.minorVersion < 2)) {
@@ -251,7 +272,7 @@ void render(sf::Time const& delta) {
 }
 
 void physics(sf::Time const& delta) {
-    std::cout << delta.asSeconds() << std::endl;
+    //std::cout << delta.asSeconds() << std::endl;
     world->stepSimulation(delta.asSeconds(), 8, timestep.sec());
 }
 

@@ -58,7 +58,10 @@ void server(Ptr<coro::Event> event) {
         assert(ship);
         ship->position = sfr::Vector(1, 1, 1);
         ship->type = std::string("foo");
+        syncTable(db);
 
+        ship->position = sfr::Vector(2, 2, 2);
+        ship->type = std::string("foobar"); // Should not get sent
         syncTable(db);
 
         while (!done) {
@@ -80,12 +83,13 @@ void client(Ptr<coro::Event> event) {
 
         setup(db);
         recvMessage(db, conn); 
+        recvMessage(db, conn); 
 
         done = true;
         event->notifyAll();
 
         auto ship = db->object<Ship>("models/ship1");
-        assert(ship->position() == sfr::Vector(1, 1, 1));
+        assert(ship->position() == sfr::Vector(2, 2, 2));
         assert(ship->type() == "foo");
         std::cout << "pass" << std::endl;
     } catch (coro::SystemError const& ex) {

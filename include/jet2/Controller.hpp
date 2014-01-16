@@ -41,6 +41,7 @@ public:
     Ptr<Model> model() const { return model_; }
     btScalar mass() const { return mass_; }
     virtual void tick() {}
+    virtual void collision(Ptr<Controller> other, btVector3 const& point) {}
 
 private:
     void run();
