@@ -37,7 +37,7 @@ public:
     void setWorldTransform(btTransform const& trans);
 
     Ptr<btRigidBody> body() const { return body_; }
-    Ptr<btCompoundShape> shape() const { return shape_; }
+    Ptr<btCollisionShape> shape() const { return shape_; }
     Ptr<Model> model() const { return model_; }
     btScalar mass() const { return mass_; }
     virtual void tick() {}
@@ -48,7 +48,7 @@ private:
 
     btScalar mass_;
     Ptr<Model> model_;
-    Ptr<btCompoundShape> shape_;
+    Ptr<btCollisionShape> shape_;
     Ptr<btRigidBody> body_;
     Ptr<coro::Coroutine> coro_;
 };

@@ -28,19 +28,24 @@
 namespace jet2 {
 
 Controller::Controller(Ptr<Model> model, Ptr<sfr::Transform> root) {
-    mass_ = (root ? massFor(root) : 0);
+    auto static defaultShape = std::make_shared<btBoxShape>(btVector3(.1, .1, .1));
+    mass_ = (root ? massFor(root) : .1);
     model_ = model;
-    shape_ = root ? shapeFor(root) : 0;
-
-    if (shape_) {
-        btVector3 localInertia;
-        shape_->calculateLocalInertia(mass_, localInertia);
-        body_.reset(new btRigidBody(mass_, this, shape_.get(), localInertia));
-        body_->setUserPointer(this);
-        body_->setSleepingThresholds(0.03f, 0.01f);
-        body_->setActivationState(DISABLE_DEACTIVATION);
-        world->addRigidBody(body_.get());
+    if (root) {
+        shape_ = shapeFor(root);
+    } else {
+        shape_ = defaultShape;
     }
+
+    btVector3 localInertia(0, 0, 0);
+    if (shape_) {
+        shape_->calculateLocalInertia(mass_, localInertia);
+    }
+    body_.reset(new btRigidBody(mass_, this, shape_.get(), localInertia));
+    body_->setUserPointer(this);
+    body_->setSleepingThresholds(0.03f, 0.01f);
+    body_->setActivationState(DISABLE_DEACTIVATION);
+    world->addRigidBody(body_.get());
     coro_ = coro::start([this]() { run(); });
 }
 

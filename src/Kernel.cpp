@@ -267,19 +267,20 @@ void render(sf::Time const& delta) {
     particleRenderer->operator()(scene);
     transparencyRenderer->operator()(scene);
    // boundsRenderer->operator()(scene);
-
-    window->display(); 
 }
 
 void physics(sf::Time const& delta) {
-    //std::cout << delta.asSeconds() << std::endl;
+    if (delta.asSeconds() > .018) {
+        std::cout << delta.asSeconds() << std::endl;
+    }
     world->stepSimulation(delta.asSeconds(), 8, timestep.sec());
 }
 
 void loop(sf::Time const& delta) {
     input(delta);
-    physics(delta);
-    render(delta);
+    render(delta); // Begin rendering
+    physics(delta); // Update physics in parallel
+    window->display();  // Wait for vsync
 }
 
 void exit() {
