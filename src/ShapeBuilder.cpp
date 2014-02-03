@@ -39,7 +39,7 @@ void ShapeBuilder::operator()(Ptr<sfr::Transform> transform) {
 // current transform, and store it the result temporarily.
     sfr::Matrix previous = transform_;
     transform_ = transform_ * transform->transform();
-    for (sfr::Iterator<sfr::Node> node = transform->children(); node; node++) {
+    for (sfr::Iterator<std::vector<Ptr<sfr::Node>>> node = transform->children(); node; node++) {
         node(std::static_pointer_cast<ShapeBuilder>(shared_from_this()));
     }
     transform_ = previous;
@@ -64,8 +64,6 @@ void ShapeBuilder::operator()(Ptr<sfr::Mesh> node) {
     auto btrot = btQuaternion(rot.x, rot.y, rot.z, rot.w);
     auto bttransform = btTransform(btrot, btpos);
     shape_->addChildShape(bttransform, shape.get());
-    std::cout << transform.origin() << std::endl;
-    std::cout << transform.rotation() << std::endl;
 }
 
 }

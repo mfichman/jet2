@@ -36,17 +36,12 @@ Ptr<sf::Window> window;
 Ptr<sfr::World> const scene(new sfr::World);
 Ptr<sfr::AssetTable> const assets(new sfr::AssetTable);
 Ptr<sfr::WavefrontLoader> meshLoader;
-Ptr<sfr::EffectLoader> effectLoader;
+Ptr<sfr::ProgramLoader> programLoader;
 Ptr<sfr::TextureLoader> textureLoader;
 Ptr<sfr::TransformUpdater> updater;
 Ptr<sfr::BoundsRenderer> boundsRenderer;
 Ptr<sfr::ShadowRenderer> shadowRenderer;
 Ptr<sfr::DeferredRenderer> deferredRenderer;
-Ptr<sfr::SkyboxRenderer> skyboxRenderer;
-Ptr<sfr::RibbonRenderer> ribbonRenderer;
-Ptr<sfr::BillboardRenderer> billboardRenderer;
-Ptr<sfr::ParticleRenderer> particleRenderer;
-Ptr<sfr::TransparencyRenderer> transparencyRenderer;
 
 // Physics
 Ptr<btDefaultCollisionConfiguration> collisionConfig;
@@ -86,7 +81,7 @@ void tick(btDynamicsWorld* world, btScalar timestep) {
 
 void init() {
     meshLoader.reset(new sfr::WavefrontLoader(assets));
-    effectLoader.reset(new sfr::EffectLoader(assets));
+    programLoader.reset(new sfr::ProgramLoader(assets));
     textureLoader.reset(new sfr::TextureLoader(assets));
     updater.reset(new sfr::TransformUpdater);
 
@@ -99,9 +94,9 @@ void init() {
 
 // Initialize the renderers, asset loaders, database, etc.
     sf::ContextSettings settings(32, 0, 0, 3, 2);
-  //  sf::VideoMode mode(1920, 1200);
+    //sf::VideoMode mode(1920, 1200);
     //window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Fullscreen, settings);
-    sf::VideoMode mode(1200, 800);
+    sf::VideoMode mode(1600, 1000);
     window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Default, settings);
     window->setVerticalSyncEnabled(true);
     window->setMouseCursorVisible(false);
@@ -124,11 +119,6 @@ void init() {
     boundsRenderer = std::make_shared<sfr::BoundsRenderer>(assets);
     shadowRenderer = std::make_shared<sfr::ShadowRenderer>(assets);
     deferredRenderer = std::make_shared<sfr::DeferredRenderer>(assets);
-    skyboxRenderer = std::make_shared<sfr::SkyboxRenderer>(assets);
-    ribbonRenderer = std::make_shared<sfr::RibbonRenderer>(assets);
-    billboardRenderer = std::make_shared<sfr::BillboardRenderer>(assets);
-    particleRenderer = std::make_shared<sfr::ParticleRenderer>(assets);
-    transparencyRenderer = std::make_shared<sfr::TransparencyRenderer>(assets);
 
     world->setInternalTickCallback(tick, nullptr, true);
 }
@@ -258,14 +248,7 @@ void render(sf::Time const& delta) {
 // Render one frame of the scene, and display it. 
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-    updater->operator()(scene); 
-    shadowRenderer->operator()(scene);
     deferredRenderer->operator()(scene);
-    skyboxRenderer->operator()(scene);
-    billboardRenderer->operator()(scene);
-    ribbonRenderer->operator()(scene);
-    particleRenderer->operator()(scene);
-    transparencyRenderer->operator()(scene);
    // boundsRenderer->operator()(scene);
 }
 
@@ -277,9 +260,11 @@ void physics(sf::Time const& delta) {
 }
 
 void loop(sf::Time const& delta) {
-    input(delta);
     render(delta); // Begin rendering
+    input(delta); // Process input 
     physics(delta); // Update physics in parallel
+    updater->operator()(scene); 
+    shadowRenderer->operator()(scene); // Render shadows for next frame
     window->display();  // Wait for vsync
 }
 

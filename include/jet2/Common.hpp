@@ -29,6 +29,7 @@
 #include <SFML/Window.hpp>
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
+//#define BT_USE_DOUBLE_PRECISION
 #include <bullet/btBulletCollisionCommon.h>
 #include <bullet/btBulletDynamicsCommon.h>
 #include <sfr/sfr.hpp>
