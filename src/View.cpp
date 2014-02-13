@@ -30,20 +30,17 @@ namespace jet2 {
 View::View(Ptr<Model> model) {
     node_ = jet2::scene->root()->childIs<sfr::Transform>("");
     model_ = model;
-    coro_ = coro::start([this]() { run(); });
+    tickListenerIs(this);
 }
 
 View::~View() {
     jet2::scene->root()->childDel(node_);
+    tickListenerDel(this);
 }
 
-void View::run() {
-    while (true) {
-        node_->positionIs(model_->position());
-        node_->rotationIs(model_->rotation());
-        tick();
-        jet2::step();
-    }
+void View::tick() {
+    node_->positionIs(model_->position());
+    node_->rotationIs(model_->rotation());
 }
 
 }

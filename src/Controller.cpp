@@ -46,20 +46,14 @@ Controller::Controller(Ptr<Model> model, Ptr<sfr::Transform> root) {
     body_->setSleepingThresholds(0.03f, 0.01f);
     body_->setActivationState(DISABLE_DEACTIVATION);
     world->addRigidBody(body_.get());
-    coro_ = coro::start([this]() { run(); });
+    tickListenerIs(this);
 }
 
 Controller::~Controller() {
     if (body_) {
         world->removeCollisionObject(body_.get());
     } 
-}
-
-void Controller::run() {
-    while (true) {
-        tick();
-        jet2::step();
-    }
+    tickListenerDel(this);
 }
 
 void Controller::getWorldTransform(btTransform& trans) const {

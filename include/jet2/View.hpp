@@ -26,23 +26,21 @@
 #include "jet2/Object.hpp"
 #include "jet2/Functor.hpp"
 #include "jet2/Model.hpp"
+#include "jet2/Kernel.hpp"
 
 namespace jet2 {
 
-class View : public Object {
+class View : private virtual TickListener, public Object {
 public:
     View(Ptr<Model> model);
     virtual ~View();
     Ptr<Model> model() const { return model_; }
     Ptr<sfr::Transform> node() const { return node_; }
-    virtual void tick() {}
+    virtual void tick();
 
 private:
-    void run();
-
     Ptr<Model> model_;
     Ptr<sfr::Transform> node_;
-    Ptr<coro::Coroutine> coro_;
 };
 
 };

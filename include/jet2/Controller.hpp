@@ -26,10 +26,11 @@
 #include "jet2/Object.hpp"
 #include "jet2/Functor.hpp"
 #include "jet2/Model.hpp"
+#include "jet2/Kernel.hpp"
 
 namespace jet2 {
 
-class Controller : private virtual btMotionState, public Object {
+class Controller : private virtual btMotionState, private virtual TickListener, public Object {
 public:
     Controller(Ptr<Model> model, Ptr<sfr::Transform> root);
     virtual ~Controller();
@@ -44,13 +45,10 @@ public:
     virtual void collision(Ptr<Controller> other, btVector3 const& point) {}
 
 private:
-    void run();
-
     btScalar mass_;
     Ptr<Model> model_;
     Ptr<btCollisionShape> shape_;
     Ptr<btRigidBody> body_;
-    Ptr<coro::Coroutine> coro_;
 };
 
 }

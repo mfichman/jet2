@@ -30,6 +30,8 @@
 namespace jet2 {
 
 
+std::vector<TickListener*> listeners;
+
 Ptr<sf::Window> window;
 
 // Rendering
@@ -73,6 +75,10 @@ void tick(btDynamicsWorld* world, btScalar timestep) {
             ca->collision(cb, pa);
             cb->collision(ca, pb);
         }
+    }
+
+    for (auto listener : listeners) {
+        listener->tick();
     }
 
     stepEvent->notifyAll();
@@ -281,6 +287,14 @@ void run() {
     //coro::start(std::bind(task, sync, 60));
     // Run at 60 Hz for better response time
     coro::run();
+}
+
+void tickListenerIs(TickListener* listener) {
+    listeners.push_back(listener);
+}
+
+void tickListenerDel(TickListener* listener) {
+    std::remove(listeners.begin(), listeners.end(), listener);
 }
 
 }
