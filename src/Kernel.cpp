@@ -30,7 +30,8 @@
 namespace jet2 {
 
 
-std::vector<TickListener*> listeners;
+std::vector<TickListener*> tickListener;
+std::vector<RenderListener*> renderListener;
 
 Ptr<sf::Window> window;
 
@@ -51,7 +52,7 @@ Ptr<btCollisionDispatcher> dispatcher;
 Ptr<btDbvtBroadphase> broadphase;
 Ptr<btSequentialImpulseConstraintSolver> solver;
 Ptr<btDiscreteDynamicsWorld> world;
-Ptr<coro::Event> stepEvent;
+Ptr<coro::Event> tickEvent;
 
 Ptr<Table> const db = std::make_shared<Table>();
 coro::Time const timestep = coro::Time::sec(1./60.);
@@ -77,11 +78,11 @@ void tick(btDynamicsWorld* world, btScalar timestep) {
         }
     }
 
-    for (auto listener : listeners) {
+    for (auto listener : tickListener) {
         listener->tick();
     }
 
-    stepEvent->notifyAll();
+    tickEvent->notifyAll();
     coro::yield();
 }
 
@@ -96,13 +97,14 @@ void init() {
     broadphase.reset(new btDbvtBroadphase());
     solver.reset(new btSequentialImpulseConstraintSolver());
     world.reset(new btDiscreteDynamicsWorld(dispatcher.get(), broadphase.get(), solver.get(), collisionConfig.get()));
-    stepEvent.reset(new coro::Event);
+    tickEvent.reset(new coro::Event);
 
 // Initialize the renderers, asset loaders, database, etc.
     sf::ContextSettings settings(32, 0, 0, 3, 2);
     //sf::VideoMode mode(1920, 1200);
     //window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Fullscreen, settings);
-    sf::VideoMode mode(1600, 1000);
+    //sf::VideoMode mode(1600, 1000);
+    sf::VideoMode mode(1200, 800);
     window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Default, settings);
     window->setVerticalSyncEnabled(true);
     window->setMouseCursorVisible(false);
@@ -230,7 +232,7 @@ void sync(sf::Time const& delta) {
 
 
 void input(sf::Time const& delta) {
-// Handle window input and dispatch it to any listeners.
+// Handle window input and dispatch it to any tickListener.
     sf::Event evt;
     while (window->pollEvent(evt)) {
         switch (evt.type) {
@@ -252,6 +254,10 @@ void input(sf::Time const& delta) {
 
 void render(sf::Time const& delta) {
 // Render one frame of the scene, and display it. 
+    for (auto listener : renderListener) {
+        listener->render();
+    }
+
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
     deferredRenderer->operator()(scene);
@@ -266,20 +272,25 @@ void physics(sf::Time const& delta) {
 }
 
 void loop(sf::Time const& delta) {
-    render(delta); // Begin rendering
+    // FIXME: Should we render first or update physics first?  By rendering
+    // first, we get to update physics in parallel before the vsync.  However,
+    // if we do this, the rendering will be out-of-date relative to realtime
+    // due to some elapsed time between physics update for prev. frame &
+    // rendering for the current frame.
     input(delta); // Process input 
-    physics(delta); // Update physics in parallel
+    physics(delta); // Physics in parallel
     updater->operator()(scene); 
     shadowRenderer->operator()(scene); // Render shadows for next frame
+    render(delta); // Render
     window->display();  // Wait for vsync
 }
 
 void exit() {
 }
 
-void step() {
+void tick() {
     // Wait for the physics step event
-    stepEvent->wait();
+    tickEvent->wait();
 }
 
 void run() {
@@ -290,11 +301,19 @@ void run() {
 }
 
 void tickListenerIs(TickListener* listener) {
-    listeners.push_back(listener);
+    tickListener.push_back(listener);
 }
 
 void tickListenerDel(TickListener* listener) {
-    std::remove(listeners.begin(), listeners.end(), listener);
+    std::remove(tickListener.begin(), tickListener.end(), listener);
+}
+
+void renderListenerIs(RenderListener* listener) {
+    renderListener.push_back(listener);
+}
+
+void renderListenerDel(RenderListener* listener) {
+    std::remove(renderListener.begin(), renderListener.end(), listener);
 }
 
 }

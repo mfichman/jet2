@@ -32,13 +32,21 @@ public:
     virtual void tick()=0;
 };
 
+class RenderListener {
+public:
+    virtual ~RenderListener() {};
+    virtual void render()=0;
+};
+
 void init();
 void run();
 void exit();
-void step(); // For coroutines, wait until the next tick event.
+void tick(); // For coroutines, wait until the next tick event.
 
 void tickListenerIs(TickListener* listener);
 void tickListenerDel(TickListener* listener);
+void renderListenerIs(RenderListener* listener);
+void renderListenerDel(RenderListener* listener);
 
 extern Ptr<Table> const db;
 extern Ptr<sfr::AssetTable> const assets;

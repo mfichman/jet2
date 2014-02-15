@@ -30,13 +30,14 @@
 
 namespace jet2 {
 
-class View : private virtual TickListener, public Object {
+class View : private virtual TickListener, private virtual RenderListener, public Object {
 public:
     View(Ptr<Model> model);
     virtual ~View();
     Ptr<Model> model() const { return model_; }
     Ptr<sfr::Transform> node() const { return node_; }
     virtual void tick();
+    virtual void render();
 
 private:
     Ptr<Model> model_;

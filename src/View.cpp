@@ -31,16 +31,21 @@ View::View(Ptr<Model> model) {
     node_ = jet2::scene->root()->childIs<sfr::Transform>("");
     model_ = model;
     tickListenerIs(this);
+    renderListenerIs(this);
 }
 
 View::~View() {
     jet2::scene->root()->childDel(node_);
     tickListenerDel(this);
+    renderListenerDel(this);
 }
 
 void View::tick() {
     node_->positionIs(model_->position());
     node_->rotationIs(model_->rotation());
+}
+
+void View::render() {
 }
 
 }

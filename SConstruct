@@ -5,6 +5,7 @@ class Jet2(pkgboot.Package):
     defines = {}
     includes = [
         '/usr/local/include/bullet',
+        '/usr/local/include/freetype2',
     ]
     libs = [
         pkgboot.Lib('glew32s', 'win32'),
