@@ -99,12 +99,12 @@ void init() {
     world.reset(new btDiscreteDynamicsWorld(dispatcher.get(), broadphase.get(), solver.get(), collisionConfig.get()));
     tickEvent.reset(new coro::Event);
 
-// Initialize the renderers, asset loaders, database, etc.
+    // Initialize the renderers, asset loaders, database, etc.
     sf::ContextSettings settings(32, 0, 0, 3, 2);
     //sf::VideoMode mode(1920, 1200);
     //window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Fullscreen, settings);
-    //sf::VideoMode mode(1600, 1000);
-    sf::VideoMode mode(1200, 800);
+    sf::VideoMode mode(1600, 1000);
+    //sf::VideoMode mode(1200, 800);
     window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Default, settings);
     window->setVerticalSyncEnabled(true);
     window->setMouseCursorVisible(false);
@@ -260,6 +260,7 @@ void render(sf::Time const& delta) {
 
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
+    shadowRenderer->operator()(scene);
     deferredRenderer->operator()(scene);
    // boundsRenderer->operator()(scene);
 }
@@ -277,11 +278,10 @@ void loop(sf::Time const& delta) {
     // if we do this, the rendering will be out-of-date relative to realtime
     // due to some elapsed time between physics update for prev. frame &
     // rendering for the current frame.
+    render(delta); // Render
     input(delta); // Process input 
     physics(delta); // Physics in parallel
     updater->operator()(scene); 
-    shadowRenderer->operator()(scene); // Render shadows for next frame
-    render(delta); // Render
     window->display();  // Wait for vsync
 }
 
