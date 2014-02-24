@@ -253,11 +253,17 @@ void input(sf::Time const& delta) {
             } else if (evt.key.code == sf::Keyboard::F4 && evt.key.alt) {
                 ::exit(0);
             }
+            inputQueue.push_back(evt);
+            break;
+        case sfr::Event::TextEntered: // Fallthrough
+        case sfr::Event::JoystickButtonPressed: // Fallthrough
+        case sfr::Event::MouseButtonPressed: // Fallthrough
+        case sfr::Event::MouseWheelMoved: // Fallthrough
+            inputQueue.push_back(evt);
             break;
         default: 
             break;
         }
-        inputQueue.push_back(evt);
     }
     if (!inputQueue.empty()) {
         inputEvent->notifyAll();
