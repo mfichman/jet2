@@ -32,6 +32,7 @@ namespace jet2 {
 
 std::vector<TickListener*> tickListener;
 std::vector<RenderListener*> renderListener;
+std::vector<sf::Event> inputQueue;
 
 Ptr<sf::Window> window;
 
@@ -52,7 +53,8 @@ Ptr<btCollisionDispatcher> dispatcher;
 Ptr<btDbvtBroadphase> broadphase;
 Ptr<btSequentialImpulseConstraintSolver> solver;
 Ptr<btDiscreteDynamicsWorld> world;
-Ptr<coro::Event> tickEvent;
+Ptr<coro::Event> const tickEvent(new coro::Event);
+Ptr<coro::Event> const inputEvent(new coro::Event);
 
 Ptr<Table> const db = std::make_shared<Table>();
 coro::Time const timestep = coro::Time::sec(1./60.);
@@ -87,6 +89,10 @@ void tick(btDynamicsWorld* world, btScalar timestep) {
 }
 
 void init() {
+    if (window) {
+        return;
+    }
+
     meshLoader.reset(new sfr::WavefrontLoader(assets));
     programLoader.reset(new sfr::ProgramLoader(assets));
     textureLoader.reset(new sfr::TextureLoader(assets));
@@ -97,14 +103,15 @@ void init() {
     broadphase.reset(new btDbvtBroadphase());
     solver.reset(new btSequentialImpulseConstraintSolver());
     world.reset(new btDiscreteDynamicsWorld(dispatcher.get(), broadphase.get(), solver.get(), collisionConfig.get()));
-    tickEvent.reset(new coro::Event);
 
     // Initialize the renderers, asset loaders, database, etc.
     sf::ContextSettings settings(32, 0, 0, 3, 2);
     //sf::VideoMode mode(1920, 1200);
-    //window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Fullscreen, settings);
-    sf::VideoMode mode(1600, 1000);
     //sf::VideoMode mode(1200, 800);
+    //window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Fullscreen, settings);
+    //sf::VideoMode mode(1600, 1000);
+    //sf::VideoMode mode(800, 600);
+    sf::VideoMode mode(1200, 800);
     window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Default, settings);
     window->setVerticalSyncEnabled(true);
     window->setMouseCursorVisible(false);
@@ -234,6 +241,7 @@ void sync(sf::Time const& delta) {
 void input(sf::Time const& delta) {
 // Handle window input and dispatch it to any tickListener.
     sf::Event evt;
+    inputQueue.clear();
     while (window->pollEvent(evt)) {
         switch (evt.type) {
         case sf::Event::Closed: 
@@ -249,6 +257,10 @@ void input(sf::Time const& delta) {
         default: 
             break;
         }
+        inputQueue.push_back(evt);
+    }
+    if (!inputQueue.empty()) {
+        inputEvent->notifyAll();
     }
 }
 
@@ -289,11 +301,18 @@ void exit() {
 }
 
 void tick() {
-    // Wait for the physics step event
+// Wait for the physics step event
     tickEvent->wait();
 }
 
+void input() {
+// Block the current coroutine until there is input.
+    inputEvent->wait();
+}
+
+
 void run() {
+    init();
     auto cloop = coro::start(std::bind(task, loop, 120));
     //coro::start(std::bind(task, sync, 60));
     // Run at 60 Hz for better response time

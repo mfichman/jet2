@@ -39,21 +39,30 @@ public:
 };
 
 void init();
-void run();
-void exit();
+void run(); // Run the engine
+void exit(); // Quit the program
 void tick(); // For coroutines, wait until the next tick event.
+void input(); // Wait for next input event
 
 void tickListenerIs(TickListener* listener);
 void tickListenerDel(TickListener* listener);
 void renderListenerIs(RenderListener* listener);
 void renderListenerDel(RenderListener* listener);
+// Optimizations over using coroutines to process events (e.g., tick, render,
+// etc.).  Coroutine context switching is more expensive than dispatching to a
+// handler.  FIXME: Find out a way to make coroutine context switching cheaper
+// to allow coroutines to be used extensively.
 
 extern Ptr<Table> const db;
 extern Ptr<sfr::AssetTable> const assets;
 extern Ptr<sfr::World> const scene;
 extern Ptr<btDiscreteDynamicsWorld> world;
-extern Ptr<sf::Window> window;
+extern Ptr<sf::Window> window; // FIXME
+extern Ptr<coro::Event> const tickEvent;
+extern Ptr<coro::Event> const inputEvent;
+extern std::vector<sf::Event> inputQueue; // FIXME
 extern coro::Time const timestep;
+
 
 // Private
 void syncTable(Ptr<Table> db);
