@@ -1,0 +1,9 @@
+# Blender MTL File: 'Plane.blend'
+# Material Count: 0
+newmtl Metal
+Kd .8 .8 .8
+Ks 0 0 0
+#.8 .8 .8
+Ka 1.0 1.0 1.0
+Ns 10.
+
