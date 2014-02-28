@@ -42,6 +42,7 @@ void init();
 void run(); // Run the engine
 void exit(); // Quit the program
 void tick(); // For coroutines, wait until the next tick event.
+void render(); // Wait until the next frame 
 void input(); // Wait for next input event
 
 void tickListenerIs(TickListener* listener);
@@ -60,6 +61,7 @@ extern Ptr<btDiscreteDynamicsWorld> world;
 extern Ptr<sf::Window> window; // FIXME
 extern Ptr<coro::Event> const tickEvent;
 extern Ptr<coro::Event> const inputEvent;
+extern Ptr<coro::Event> const renderEvent;
 extern std::vector<sf::Event> inputQueue; // FIXME
 extern coro::Time const timestep;
 

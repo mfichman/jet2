@@ -54,14 +54,15 @@
 
 namespace jet2 {
 class Code;
-class Table;
-class Exception;
-class Object;
-class Functor;
-class Model;
-class Controller;
-class Timer;
 class Connection;
+class Controller;
+class Exception;
+class Functor;
+class InputDispatcher;
+class Model;
+class Object;
+class Table;
+class Timer;
 
 template <typename T>
 using Ptr = std::shared_ptr<T>;

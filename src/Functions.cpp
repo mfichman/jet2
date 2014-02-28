@@ -88,4 +88,27 @@ btScalar massFor(Ptr<sfr::Transform> node, btScalar density) {
     return 1.;
 }
 
+void slide(Ptr<sfr::Ui> ui, sfr::GLvec2 end, coro::Time duration) {
+// Slide a UI component to the given coordinates over the given duration.
+    GLfloat const startx = ui->x().value();
+    GLfloat const starty = ui->y().value();
+    GLfloat const distx = end.u-startx;
+    GLfloat const disty = end.v-starty;
+
+    sf::Clock clock;
+    while (clock.getElapsedTime().asSeconds() < duration.sec()) {
+        auto x = ui->x();
+        auto y = ui->y();
+        auto dx = distx*clock.getElapsedTime().asSeconds()/duration.sec();
+        auto dy = disty*clock.getElapsedTime().asSeconds()/duration.sec();
+        ui->xIs(sfr::Coord(startx+dx, x.unit(), x.basis()));
+        ui->yIs(sfr::Coord(starty+dy, y.unit(), y.basis()));
+        jet2::render();
+    }
+    auto x = ui->x();
+    auto y = ui->y();
+    ui->xIs(sfr::Coord(end.u, x.unit(), x.basis()));
+    ui->yIs(sfr::Coord(end.v, y.unit(), y.basis()));
+}
+
 }

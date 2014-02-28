@@ -39,12 +39,9 @@ Ptr<sf::Window> window;
 // Rendering
 Ptr<sfr::World> const scene(new sfr::World);
 Ptr<sfr::AssetTable> const assets(new sfr::AssetTable);
-Ptr<sfr::WavefrontLoader> meshLoader;
-Ptr<sfr::ProgramLoader> programLoader;
-Ptr<sfr::TextureLoader> textureLoader;
+Ptr<sfr::AssetLoader> assetLoader;
 Ptr<sfr::TransformUpdater> updater;
 Ptr<sfr::BoundsRenderer> boundsRenderer;
-Ptr<sfr::ShadowRenderer> shadowRenderer;
 Ptr<sfr::DeferredRenderer> deferredRenderer;
 
 // Physics
@@ -55,6 +52,7 @@ Ptr<btSequentialImpulseConstraintSolver> solver;
 Ptr<btDiscreteDynamicsWorld> world;
 Ptr<coro::Event> const tickEvent(new coro::Event);
 Ptr<coro::Event> const inputEvent(new coro::Event);
+Ptr<coro::Event> const renderEvent(new coro::Event);
 
 Ptr<Table> const db = std::make_shared<Table>();
 coro::Time const timestep = coro::Time::sec(1./60.);
@@ -93,9 +91,7 @@ void init() {
         return;
     }
 
-    meshLoader.reset(new sfr::WavefrontLoader(assets));
-    programLoader.reset(new sfr::ProgramLoader(assets));
-    textureLoader.reset(new sfr::TextureLoader(assets));
+    assetLoader.reset(new sfr::AssetLoader(assets));
     updater.reset(new sfr::TransformUpdater);
 
     collisionConfig.reset(new btDefaultCollisionConfiguration());
@@ -114,7 +110,7 @@ void init() {
     sf::VideoMode mode(1200, 800);
     window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Default, settings);
     window->setVerticalSyncEnabled(true);
-    window->setMouseCursorVisible(false);
+    //window->setMouseCursorVisible(false);
 
     settings = window->getSettings();
     if (settings.majorVersion < 3 || (settings.majorVersion == 3 && settings.minorVersion < 2)) {
@@ -132,7 +128,6 @@ void init() {
     glViewport(0, 0, window->getSize().x, window->getSize().y);
 
     boundsRenderer = std::make_shared<sfr::BoundsRenderer>(assets);
-    shadowRenderer = std::make_shared<sfr::ShadowRenderer>(assets);
     deferredRenderer = std::make_shared<sfr::DeferredRenderer>(assets);
 
     world->setInternalTickCallback(tick, nullptr, true);
@@ -255,10 +250,11 @@ void input(sf::Time const& delta) {
             }
             inputQueue.push_back(evt);
             break;
-        case sfr::Event::TextEntered: // Fallthrough
-        case sfr::Event::JoystickButtonPressed: // Fallthrough
-        case sfr::Event::MouseButtonPressed: // Fallthrough
-        case sfr::Event::MouseWheelMoved: // Fallthrough
+        case sf::Event::TextEntered: // Fallthrough
+        case sf::Event::JoystickButtonPressed: // Fallthrough
+        case sf::Event::MouseButtonPressed: // Fallthrough
+        case sf::Event::MouseWheelMoved: // Fallthrough
+        case sf::Event::MouseMoved: // Fallthrough
             inputQueue.push_back(evt);
             break;
         default: 
@@ -272,30 +268,33 @@ void input(sf::Time const& delta) {
 
 void render(sf::Time const& delta) {
 // Render one frame of the scene, and display it. 
+    renderEvent->notifyAll();
+    coro::yield();
     for (auto listener : renderListener) {
         listener->render();
     }
 
     glClearColor(0.f, 0.f, 0.f, 0.f);
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
-    shadowRenderer->operator()(scene);
     deferredRenderer->operator()(scene);
    // boundsRenderer->operator()(scene);
 }
 
 void physics(sf::Time const& delta) {
+/*
     if (delta.asSeconds() > .018) {
         std::cout << delta.asSeconds() << std::endl;
     }
+*/
     world->stepSimulation(delta.asSeconds(), 8, timestep.sec());
 }
 
 void loop(sf::Time const& delta) {
-    // FIXME: Should we render first or update physics first?  By rendering
-    // first, we get to update physics in parallel before the vsync.  However,
-    // if we do this, the rendering will be out-of-date relative to realtime
-    // due to some elapsed time between physics update for prev. frame &
-    // rendering for the current frame.
+// FIXME: Should we render first or update physics first?  By rendering first,
+// we get to update physics in parallel before the vsync.  However, if we do
+// this, the rendering will be out-of-date relative to realtime due to some
+// elapsed time between physics update for prev. frame & rendering for the
+// current frame.
     render(delta); // Render
     input(delta); // Process input 
     physics(delta); // Physics in parallel
@@ -309,6 +308,11 @@ void exit() {
 void tick() {
 // Wait for the physics step event
     tickEvent->wait();
+}
+
+void render() {
+// Wait for a new frame
+    renderEvent->wait();
 }
 
 void input() {

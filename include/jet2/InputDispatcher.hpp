@@ -34,8 +34,12 @@ public:
     void operator()(Ptr<sfr::World> world);
     void operator()(Ptr<sfr::Ui> ui);
 
+    Ptr<sfr::Ui> ui() const { return ui_; }
+    // Return the UI component that the user clicked
+
 private:
     Ptr<sfr::World> world_;
+    Ptr<sfr::Ui> ui_;
     sfr::Rect rect_;
     sf::Event event_;
 };

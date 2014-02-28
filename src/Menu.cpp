@@ -23,22 +23,128 @@
 #include "jet2/Common.hpp"
 #include "jet2/Menu.hpp"
 #include "jet2/Kernel.hpp"
+#include "jet2/InputDispatcher.hpp"
+#include "jet2/Functions.hpp"
 
 namespace jet2 {
 
-Menu::Menu(const std::string& title) {
+Menu::Menu(const std::string& title, int titleSize) {
+    dispatcher_.reset(new InputDispatcher);
+    titleSize_ = titleSize;
+
     ui_ = jet2::scene->ui()->childIs<sfr::Ui>();
+    ui_->xIs(sfr::Coord(1, sfr::Coord::PERCENT));
+    ui_->yIs(sfr::Coord(.25, sfr::Coord::PERCENT));
+
+    offset_ = 0;
+
+    auto ui = ui_->childIs<sfr::Ui>();
+    ui->yIs(sfr::Coord(offset_, sfr::Coord::PIXELS, sfr::Coord::BEGIN));
+    ui->xIs(sfr::Coord(0, sfr::Coord::PERCENT));
+    ui->heightIs(sfr::Span(titleSize_+verticalSpacing_*2, sfr::Span::PIXELS));
+
+    auto caps = title;
+    std::transform(caps.begin(), caps.end(), caps.begin(), ::toupper);
+
+    auto font = format("fonts/%s.ttf#%d", fontName_.c_str(), titleSize_);
+    auto text = ui->childIs<sfr::Text>();
+    text->textIs(caps);
+    text->fontIs(assets->assetIs<sfr::Font>(font));
+    text->colorIs(sfr::Color(1, .8, .2, 1));
+    text->sizeIs(titleSize_);
+    offset_ += text->size()+verticalSpacing_*2;
 }
 
 Menu::~Menu() {
     jet2::scene->ui()->childDel(ui_);
 }
 
-void Menu::optionIs(GLuint index, std::string const& text) {
+void Menu::optionIs(std::string const& str, MenuFunc func) {
+    auto ui = ui_->childIs<sfr::Ui>();
+    ui->yIs(sfr::Coord(offset_, sfr::Coord::PIXELS, sfr::Coord::BEGIN));
+    ui->xIs(sfr::Coord(0, sfr::Coord::PERCENT));
+    ui->heightIs(sfr::Span(optionSize_+verticalSpacing_, sfr::Span::PIXELS));
+
+    //auto font = format("fonts/%s.ttf#%d", fontName_.c_str(), optionSize_);
+    auto font = format("fonts/%s.ttf#%d", "NeuropolX", optionSize_);
+    auto text = ui->childIs<sfr::Text>();
+    text->textIs(str);
+    text->fontIs(assets->assetIs<sfr::Font>(font));
+    text->colorIs(sfr::Color(1, 1, 1, .6));
+    text->sizeIs(optionSize_);
+    offset_ += text->size()+verticalSpacing_;
+     
+    func_.push_back(func);  
 }
 
-GLuint Menu::select() {
-    return 0;
+void Menu::quit() {
+    quit_ = true;
 }
+
+void Menu::select() {
+    quit_ = false;
+    while (!quit_) {
+        ui_->xIs(sfr::Coord(1, sfr::Coord::PERCENT));
+        slide(ui_, sfr::GLvec2(.05, .25), coro::Time::sec(.15));
+
+ 
+        auto mouse = sf::Mouse::getPosition(*jet2::window);
+        auto event = sf::Event();
+        event.type = sf::Event::MouseMoved;
+        event.mouseMove.x = mouse.x;
+        event.mouseMove.y = mouse.y;
+        mouseMoved(event); 
+    
+        option_ = -1;
+        while (option_ == -1) {
+            jet2::inputEvent->wait();
+            input();
+        }
+        slide(ui_, sfr::GLvec2(-1, .25), coro::Time::sec(.15));
+        func_[option_]();
+    }
+
+}
+
+void Menu::input() {
+// Check for collisions between mouse click & menu items
+    for (auto evt : jet2::inputQueue) {
+        switch (evt.type) {
+        case sf::Event::MouseButtonPressed:
+            mouseButtonPressed(evt);
+            break;
+        case sf::Event::MouseMoved:
+            mouseMoved(evt);
+            break;
+        default:
+            break;
+        }
+    }
+}
+
+void Menu::mouseMoved(sf::Event const& evt) {
+    dispatcher_->input(evt, jet2::scene);
+    for (GLuint i = 0; i < func_.size(); ++i) {
+        auto ui = ui_->child<sfr::Ui>(i+1);
+        auto text = ui->child<sfr::Text>(0);
+        if (dispatcher_->ui() == ui) {
+            text->colorIs(sfr::Color(1, 1, 1, 1));
+        } else {
+            text->colorIs(sfr::Color(1, 1, 1, .6));
+        }
+    }
+}
+
+void Menu::mouseButtonPressed(sf::Event const& evt) {
+// Check for clicks within a button
+    dispatcher_->input(evt, jet2::scene);
+    for (GLuint i = 0; i < func_.size(); ++i) {
+        if (dispatcher_->ui() == ui_->child(i+1)) {
+            option_ = i;
+            return;
+        }
+    }
+}
+
 
 }

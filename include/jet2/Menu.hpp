@@ -27,16 +27,41 @@
 
 namespace jet2 {
 
+typedef std::function<void()> MenuFunc;
+
 class Menu : public Object {
 public:
-    Menu(const std::string& title);
+    Menu(const std::string& title, int titleSize=86);
     ~Menu();
 
-    void optionIs(GLuint index, std::string const& text); 
-    GLuint select();
+    void optionIs(std::string const& text, MenuFunc func); 
+    void optionSizeIs(int optionSize) { optionSize_ = optionSize; }
+
+    int titleSize() const { return titleSize_; }
+    int optionSize() const { return optionSize_; }
+    Ptr<sfr::Ui> ui() const { return ui_; }
+
+    // Blocks the current coroutine until a menu option is selected
+    void select();
+    void quit();
     
 private:
+    void input();
+    void mouseButtonPressed(sf::Event const& evt);
+    void mouseMoved(sf::Event const& evt);
+
     Ptr<sfr::Ui> ui_;
+    Ptr<InputDispatcher> dispatcher_;
+    std::vector<MenuFunc> func_;
+    int option_ = 0;
+    int offset_ = 0;
+
+
+    bool quit_ = false;
+    int verticalSpacing_ = 15;
+    int optionSize_ = 32;
+    int titleSize_;
+    std::string fontName_ = "NeuropolXBold";
 };
 
 

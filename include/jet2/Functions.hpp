@@ -28,8 +28,18 @@ namespace jet2 {
 
 std::string readFile(std::string const& path);
 void screenSnapshot(std::string const& file);
+void slide(Ptr<sfr::Ui> ui, sfr::GLvec2 end, coro::Time duration);
 Ptr<btBoxShape> shapeFor(Ptr<sfr::Mesh> mesh);
 Ptr<btCompoundShape> shapeFor(Ptr<sfr::Transform> transform);
 btScalar massFor(Ptr<sfr::Transform> transform, btScalar density=1.);
+
+template <typename ...Arg>
+std::string format(char const* format, Arg... arg) {
+    char name[1024];
+    snprintf(name, sizeof(name), format, arg...);
+    return std::string(name);
+}
+
+
 
 }

@@ -59,7 +59,28 @@ void update(Ptr<sfr::Transform> node) {
     }
 }
 
+void menus() {
+
+    // FIXME
+    auto menu = jet2::Menu("zero combat.");
+    menu.optionIs("multiplayer", [&]() { 
+        std::cout << "multiplayer" << std::endl;
+    });
+    menu.optionIs("single player", [&]() { 
+        std::cout << "single player" << std::endl;
+    });
+    menu.optionIs("quit", [&]() { 
+        std::cout << "quit" << std::endl;
+        exit(0);
+    });
+    menu.select();
+    // FIXME
+
+}
+
 int main(int argc, char** argv) {
+    jet2::init();
+
     auto root = jet2::scene->root();
 
     auto position = sfr::Vector(2.5, 2, 2.5);
@@ -106,6 +127,7 @@ int main(int argc, char** argv) {
     root->childIs(asset);
 
     auto input = coro::start(std::bind(update, asset));
+    auto menus2 = coro::start(menus);
 
     jet2::run();
     jet2::exit();

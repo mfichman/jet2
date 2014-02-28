@@ -33,6 +33,7 @@
 #include "jet2/Object.hpp"
 #include "jet2/Kernel.hpp"
 #include "jet2/Controller.hpp"
+#include "jet2/Menu.hpp"
 #include "jet2/Model.hpp"
 #include "jet2/View.hpp"
 #include "jet2/Accumulator.hpp"
