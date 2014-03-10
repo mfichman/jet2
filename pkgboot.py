@@ -5,7 +5,6 @@ import sys
 import shutil
 import subprocess
 import shlex
-import glob
 
 try:
     from SCons.Script import *
@@ -117,7 +116,7 @@ class Package:
     def _setup_win(self):
         # Set up Windows-specific options
         if self.build_mode == 'debug':
-            pass 
+            self.env.Append(CXXFLAGS='/Od')
         elif self.build_mode == 'release':
             self.env.Append(CXXFLAGS='/O2')
         else:
@@ -199,9 +198,6 @@ class Package:
         if self.kind == 'bin':
             main = self.env.Glob('Main.cpp')
             self.program = self.env.Program('bin/%s' % self.name, (self.lib, main))
-        for tool in glob.glob('tools/*.cpp'):
-            name = os.path.splitext(os.path.basename(tool.lower()))[0]
-            self.env.Program('bin/%s-%s' % (self.name, name), (self.lib, tool))
 
     def _setup_tests(self):
         # Configure the test environment
@@ -212,11 +208,7 @@ class Package:
         for test in self.env.Glob('build/test/**.cpp'):
             self.env.Depends(test, self.pch)
             name = test.name.replace('.cpp', '')
-            if self.env['PLATFORM'] == 'win32':
-                inputs = (test, self.pch)
-            else:
-                inputs = (test,)
-            prog = testenv.Program('bin/test/%s' % name, inputs)
+            prog = testenv.Program('bin/test/%s' % name, (test, self.pch))
             if 'check' in COMMAND_LINE_TARGETS:
                 self.tests.append(testenv.Test(name, prog))
         if 'check' in COMMAND_LINE_TARGETS:

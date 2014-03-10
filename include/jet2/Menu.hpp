@@ -36,6 +36,7 @@ public:
 
     void optionIs(std::string const& text, MenuFunc func); 
     void optionSizeIs(int optionSize) { optionSize_ = optionSize; }
+    void titleColorIs(sfr::Color const& color);
 
     int titleSize() const { return titleSize_; }
     int optionSize() const { return optionSize_; }
@@ -51,6 +52,7 @@ private:
     void mouseMoved(sf::Event const& evt);
 
     Ptr<sfr::Ui> ui_;
+    Ptr<sfr::Text> titleText_;
     Ptr<InputDispatcher> dispatcher_;
     std::vector<MenuFunc> func_;
     int option_ = 0;

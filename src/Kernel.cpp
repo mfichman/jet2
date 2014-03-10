@@ -23,7 +23,6 @@
 #include "jet2/Common.hpp"
 #include "jet2/Table.hpp"
 #include "jet2/Kernel.hpp"
-#include "jet2/Connection.hpp"
 #include "jet2/Model.hpp"
 #include "jet2/Controller.hpp"
 
@@ -39,7 +38,7 @@ Ptr<sf::Window> window;
 // Rendering
 Ptr<sfr::World> const scene(new sfr::World);
 Ptr<sfr::AssetTable> const assets(new sfr::AssetTable);
-Ptr<sfr::AssetLoader> assetLoader;
+Ptr<sfr::Interface> assetLoader;
 Ptr<sfr::TransformUpdater> updater;
 Ptr<sfr::BoundsRenderer> boundsRenderer;
 Ptr<sfr::DeferredRenderer> deferredRenderer;
@@ -86,21 +85,11 @@ void tick(btDynamicsWorld* world, btScalar timestep) {
     coro::yield();
 }
 
-void init() {
-    if (window) {
-        return;
-    }
-
+void initWindow() {
+    // Initialize the renderers, asset loaders, etc.
     assetLoader.reset(new sfr::AssetLoader(assets));
     updater.reset(new sfr::TransformUpdater);
 
-    collisionConfig.reset(new btDefaultCollisionConfiguration());
-    dispatcher.reset(new btCollisionDispatcher(collisionConfig.get()));
-    broadphase.reset(new btDbvtBroadphase());
-    solver.reset(new btSequentialImpulseConstraintSolver());
-    world.reset(new btDiscreteDynamicsWorld(dispatcher.get(), broadphase.get(), solver.get(), collisionConfig.get()));
-
-    // Initialize the renderers, asset loaders, database, etc.
     sf::ContextSettings settings(32, 0, 0, 3, 2);
     //sf::VideoMode mode(1920, 1200);
     //sf::VideoMode mode(1200, 800);
@@ -129,8 +118,27 @@ void init() {
 
     boundsRenderer = std::make_shared<sfr::BoundsRenderer>(assets);
     deferredRenderer = std::make_shared<sfr::DeferredRenderer>(assets);
+}
 
+void init(KernelMode mode) {
+    // Initialize phyics, networking, GUI (if enabled)
+    if (world) {
+        return;
+    }
+    collisionConfig.reset(new btDefaultCollisionConfiguration());
+    dispatcher.reset(new btCollisionDispatcher(collisionConfig.get()));
+    broadphase.reset(new btDbvtBroadphase());
+    solver.reset(new btSequentialImpulseConstraintSolver());
+    world.reset(new btDiscreteDynamicsWorld(dispatcher.get(), broadphase.get(), solver.get(), collisionConfig.get()));
     world->setInternalTickCallback(tick, nullptr, true);
+
+    if (mode == NORMAL) {
+        initWindow();
+    } else if (mode == HEADLESS) {
+        assetLoader.reset(new sfr::WavefrontLoader(assets));
+    } else {
+        assert(!"invalid kernel mode");
+    }
 }
 
 void task(void (*func)(sf::Time const&), uint64_t hz) {
@@ -151,115 +159,42 @@ void task(void (*func)(sf::Time const&), uint64_t hz) {
     }
 }
 
-Ptr<ModelTable> modelTable(Ptr<Table> db) {
-// Create the model/model ID mapping.  The mapping must be identical for both
-// sides of the connection.
-    auto models = db->object<ModelTable>("mt");
-    if (models) { 
-        return models; 
-    }
-    models = db->objectIs<ModelTable>("mt");
-    for (auto entry : *db->object<Table>("models")) {
-        auto data = entry.second.cast<Model>();
-        if (data->id() == 0) {
-            models->nextId = models->nextId()+1;
-            data->id = models->nextId;
+void input(sf::Event const& evt) {
+// Handle a single input event
+    switch (evt.type) {
+    case sf::Event::Closed: 
+        ::exit(0);
+        break;
+    case sf::Event::KeyPressed:
+        if (evt.key.code == sf::Keyboard::Escape) {
+            ::exit(0);
+        } else if (evt.key.code == sf::Keyboard::F4 && evt.key.alt) {
+            ::exit(0);
         }
-        models->model(data->id(), data);
-    }
-    return models;
-}
-
-void syncConnection(Ptr<Table> db, Ptr<Connection> conn) {
-// Synchronize one connection, by sending data for any dirty models.
-    for (auto entry : *db->object<Table>("models")) {
-        auto model = entry.second.cast<Model>();
-        if (model->id() == 0 || model->syncMode() == Model::DISABLED) { 
-            continue; 
-        }
-        conn->out()->val(model->id());
-        if (!conn->model(model->id())) {
-            uint8_t const flags = jet2::Model::CONSTRUCT;
-            conn->out()->val(flags);
-            model->construct(conn->out());
-            conn->model(model->id(), model);
-        } else {
-            uint8_t const flags = jet2::Model::SYNC;
-            conn->out()->val(flags);
-        }
-        conn->out()->val(model);
-        if (model->syncMode() == Model::ONCE) {
-            model->syncMode = Model::DISABLED;
-        }
-    }
-    conn->writer()->flush();
-}
-
-void syncTable(Ptr<Table> db) {
-// Update the network.  Find all outgoing connections, and broadcast any
-// updates to dirty objects.  
-    auto models = modelTable(db);
-    for (auto entry : *db->object<Table>("connections")) {
-        auto conn = entry.second.cast<Connection>();
-        if (!conn) { continue; }
-        syncConnection(db, conn);
+        inputQueue.push_back(evt);
+        break;
+    case sf::Event::TextEntered: // Fallthrough
+    case sf::Event::JoystickButtonPressed: // Fallthrough
+    case sf::Event::MouseButtonPressed: // Fallthrough
+    case sf::Event::MouseWheelMoved: // Fallthrough
+    case sf::Event::MouseMoved: // Fallthrough
+        inputQueue.push_back(evt);
+        break;
+    default: 
+        break;
     }
 }
-
-void recvMessage(Ptr<Table> db, Ptr<Connection> conn) {
-// Receive one message from a connection.
-    auto modelId = ModelId(0);
-    conn->in()->val(modelId); 
-
-    auto flags = uint8_t(0);
-    conn->in()->val(flags); 
-
-    auto models = modelTable(db); 
-    auto model = models->model(modelId);
-    assert(model && "model not found");
-    if (flags == jet2::Model::CONSTRUCT) {
-        model->construct(conn->in());
-    }
-    conn->in()->val(model);
-}
-
-void recvConnection(Ptr<Table> db, Ptr<Connection> conn) {
-// Receive a stream of messages from a connection
-     
-}
-
-void sync(sf::Time const& delta) {
-    syncTable(db);
-}
-
 
 void input(sf::Time const& delta) {
 // Handle window input and dispatch it to any tickListener.
+    if (!deferredRenderer) {
+        return; // Input disabled;
+    }
+
     sf::Event evt;
     inputQueue.clear();
     while (window->pollEvent(evt)) {
-        switch (evt.type) {
-        case sf::Event::Closed: 
-            ::exit(0);
-            break;
-        case sf::Event::KeyPressed:
-            if (evt.key.code == sf::Keyboard::Escape) {
-                ::exit(0);
-            } else if (evt.key.code == sf::Keyboard::F4 && evt.key.alt) {
-                ::exit(0);
-            }
-            inputQueue.push_back(evt);
-            break;
-        case sf::Event::TextEntered: // Fallthrough
-        case sf::Event::JoystickButtonPressed: // Fallthrough
-        case sf::Event::MouseButtonPressed: // Fallthrough
-        case sf::Event::MouseWheelMoved: // Fallthrough
-        case sf::Event::MouseMoved: // Fallthrough
-            inputQueue.push_back(evt);
-            break;
-        default: 
-            break;
-        }
+        input(evt);
     }
     if (!inputQueue.empty()) {
         inputEvent->notifyAll();
@@ -268,6 +203,10 @@ void input(sf::Time const& delta) {
 
 void render(sf::Time const& delta) {
 // Render one frame of the scene, and display it. 
+    if (!deferredRenderer) {
+        return; // Rendering disabled
+    }
+
     renderEvent->notifyAll();
     coro::yield();
     for (auto listener : renderListener) {
@@ -287,6 +226,9 @@ void physics(sf::Time const& delta) {
     }
 */
     world->stepSimulation(delta.asSeconds(), 8, timestep.sec());
+    if (deferredRenderer) {
+        updater->operator()(scene); 
+    }
 }
 
 void loop(sf::Time const& delta) {
@@ -298,8 +240,9 @@ void loop(sf::Time const& delta) {
     render(delta); // Render
     input(delta); // Process input 
     physics(delta); // Physics in parallel
-    updater->operator()(scene); 
-    window->display();  // Wait for vsync
+    if (window) {
+        window->display();  // Wait for vsync
+    }
 }
 
 void exit() {

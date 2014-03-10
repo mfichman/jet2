@@ -47,16 +47,20 @@ Menu::Menu(const std::string& title, int titleSize) {
     std::transform(caps.begin(), caps.end(), caps.begin(), ::toupper);
 
     auto font = format("fonts/%s.ttf#%d", fontName_.c_str(), titleSize_);
-    auto text = ui->childIs<sfr::Text>();
-    text->textIs(caps);
-    text->fontIs(assets->assetIs<sfr::Font>(font));
-    text->colorIs(sfr::Color(1, .8, .2, 1));
-    text->sizeIs(titleSize_);
-    offset_ += text->size()+verticalSpacing_*2;
+    titleText_ = ui->childIs<sfr::Text>();
+    titleText_->textIs(caps);
+    titleText_->fontIs(assets->assetIs<sfr::Font>(font));
+    titleText_->colorIs(sfr::Color(1, .870, .361, 1));
+    titleText_->sizeIs(titleSize_);
+    offset_ += titleText_->size()+verticalSpacing_*2;
 }
 
 Menu::~Menu() {
     jet2::scene->ui()->childDel(ui_);
+}
+
+void Menu::titleColorIs(sfr::Color const& color) {
+    titleText_->colorIs(color);
 }
 
 void Menu::optionIs(std::string const& str, MenuFunc func) {

@@ -35,7 +35,7 @@ public:
 
 void setup(Ptr<jet2::Table> db) {
     // Set up a sample scene (identical setup on both connection sides)
-    auto ship = db->objectIs<Ship>("models/ship1");
+    auto ship = db->objectIs<Ship>("ship1");
     ship->syncMode = jet2::Model::ALWAYS;
 }
 
@@ -50,19 +50,20 @@ void server(Ptr<coro::Event> event) {
 
         auto sd = ls->accept();
         auto db = std::make_shared<jet2::Table>();
-        auto conn = db->objectIs<jet2::Connection>("connections/1", sd);
+        auto conn = std::make_shared<jet2::Connection>(sd);
 
         setup(db);
 
-        auto ship = db->object<Ship>("models/ship1");
+        auto ship = db->object<Ship>("ship1");
         assert(ship);
+        ship->netMode = jet2::Model::OUTPUT;
         ship->position = sfr::Vector(1, 1, 1);
         ship->type = std::string("foo");
-        syncTable(db);
+        sendFrame(conn, db);
 
         ship->position = sfr::Vector(2, 2, 2);
         ship->type = std::string("foobar"); // Should not get sent
-        syncTable(db);
+        sendFrame(conn, db);
 
         while (!done) {
             event->wait();
@@ -78,17 +79,20 @@ void client(Ptr<coro::Event> event) {
     try {
         auto sd = std::make_shared<coro::Socket>();
         auto db = std::make_shared<jet2::Table>();
-        auto conn = db->objectIs<jet2::Connection>("connections/1", sd);
+        auto conn = std::make_shared<jet2::Connection>(sd);
         sd->connect(coro::SocketAddr("127.0.0.1", 9091));
 
         setup(db);
-        recvMessage(db, conn); 
-        recvMessage(db, conn); 
+
+        auto ship = db->object<Ship>("ship1");
+        ship->netMode = jet2::Model::INPUT;
+
+		recvMessage(conn, db);
+        recvMessage(conn, db); 
 
         done = true;
         event->notifyAll();
 
-        auto ship = db->object<Ship>("models/ship1");
         assert(ship->position() == sfr::Vector(2, 2, 2));
         assert(ship->type() == "foo");
         std::cout << "pass" << std::endl;

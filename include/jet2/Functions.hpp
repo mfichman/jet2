@@ -24,6 +24,8 @@
 
 #include "jet2/Common.hpp"
 
+#define snprintf _snprintf
+
 namespace jet2 {
 
 std::string readFile(std::string const& path);

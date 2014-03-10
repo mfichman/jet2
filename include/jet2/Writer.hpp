@@ -55,7 +55,7 @@ void Writer<T>::write(char* buf, size_t total) {
 // underlying socket/file descriptor
     while (total > 0) {
         if (len_ && total >= buffer_.capacity()) {
-            fd_->write(buf, total); 
+            fd_->writeAll(buf, total);  // Shortcut for large writes
         } else {
             auto len = std::min(total, remaining());
             auto front = &buffer_.front();
@@ -73,7 +73,7 @@ void Writer<T>::write(char* buf, size_t total) {
 template <typename T>
 void Writer<T>::flush() {
 // Flush to the underlying socket/file descriptor
-    fd_->write(&buffer_.front(), len_);
+    fd_->writeAll(&buffer_.front(), len_);
     len_ = 0;
 }
 

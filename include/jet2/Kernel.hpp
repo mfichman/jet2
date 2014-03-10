@@ -26,6 +26,8 @@
 
 namespace jet2 {
 
+enum KernelMode { NORMAL, HEADLESS };
+
 class TickListener {
 public:
     virtual ~TickListener() {};
@@ -38,7 +40,7 @@ public:
     virtual void render()=0;
 };
 
-void init();
+void init(KernelMode mode=NORMAL);
 void run(); // Run the engine
 void exit(); // Quit the program
 void tick(); // For coroutines, wait until the next tick event.
@@ -67,7 +69,12 @@ extern coro::Time const timestep;
 
 
 // Private
-void syncTable(Ptr<Table> db);
-void recvMessage(Ptr<Table> db, Ptr<Connection> conn);
+void sendFrame(Ptr<Connection> conn, Ptr<Table> db);
+void send(Ptr<Connection> conn, Ptr<Table> db);
+void send(Ptr<Connection> conn);
+void recvMessage(Ptr<Connection> conn, Ptr<Table> db);
+void recvFrame(Ptr<Connection> conn, Ptr<Table> db);
+void recv(Ptr<Connection> conn, Ptr<Table> db);
+void recv(Ptr<Connection> conn);
 
 }

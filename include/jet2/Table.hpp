@@ -28,6 +28,14 @@
 
 namespace jet2 {
 
+class TableException {
+public:
+    TableException(std::string const& message);
+    std::string const& message() const { return message_; } 
+private:
+    std::string message_;
+};
+
 class TableEntry {
 // Stores type info along with a void ptr, so that the type can be checked when
 // an object is removed from the table.  Does not support casting to base
@@ -82,9 +90,45 @@ public:
     Coll::iterator end() { return object_.end(); }
 
 private:
+    template <typename T, typename... Arg>
+    Ptr<T> leafIs(std::string const& name, Arg const&...arg);
+
+    template <typename T>
+    Ptr<T> leafIs(std::string const& name);
+
     Coll object_;
 };
 
+template <typename T, typename... Arg>
+Ptr<T> Table::leafIs(std::string const& name, Arg const&...arg) {
+    // Instantiate an object with constructor args.  If another object already
+    // exists, throw an exception.
+    auto entry = object_.find(name);
+    if (entry == object_.end()) {
+        auto object = std::make_shared<T>(arg...);
+        object_.insert(std::make_pair(name, TableEntry(object)));
+        return object;
+    } else {
+        throw TableException("object '"+name+"' already exists");
+    }
+}
+
+template <typename T>
+Ptr<T> Table::leafIs(std::string const& name) {
+    // Instantiate an object with no constructor args.  If the object already
+    // exists, just return it, as long as the type matches.  Otherwise, throw
+    // an exception.
+    auto entry = object_.find(name);
+    if (entry == object_.end()) {
+        auto object = std::make_shared<T>();
+        object_.insert(std::make_pair(name, TableEntry(object)));
+        return object;
+    } else if (Ptr<T> object = entry->second.cast<T>()) {
+        return object;        
+    } else {
+        throw TableException("object '"+name+"' already exists");
+    }
+}
 
 template <typename T, typename... Arg>
 Ptr<T> Table::objectIs(char const* path, Arg const&... arg) {
@@ -98,24 +142,12 @@ Ptr<T> Table::objectIs(char const* path, Arg const&... arg) {
         //  012/   3-0 = 3 len
         auto len = ptr - path;
         auto name = std::string(path, len);
-        auto ent = object_.find(name);
-        if (ent == object_.end()) {
-            auto table = std::make_shared<Table>();
-            object_.insert(std::make_pair(name, TableEntry(table)));
-            return table->objectIs<T>(ptr+1, arg...);
-        } else {
-            auto table = ent->second.cast<Table>();
-            assert(table); // Make sure object exists, and is s table
-            return table->objectIs<T>(ptr+1, arg...);
-        }
+        auto table = leafIs<Table>(name);
+        return table->objectIs<T>(ptr+1, arg...);
     } else {
         // Leaf node; create the object here
         auto name = std::string(path);
-        auto ent = object_.find(name);
-        assert(ent==object_.end()); // Object already exists
-        auto obj = std::make_shared<T>(arg...);
-        object_.insert(std::make_pair(name, TableEntry(obj)));
-        return obj;
+        return leafIs<T>(name, arg...);
     }
 };
 

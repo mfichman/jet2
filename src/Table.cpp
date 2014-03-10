@@ -25,6 +25,21 @@
 
 namespace jet2 {
 
+TableException::TableException(std::string const& message) {
+    message_ = message;
+    std::cerr << "error: " << message << std::endl;
+    if (!getenv("JET2_NO_DEBUG_EXCEPTIONS")) {
+#ifdef _WIN32
+        __debugbreak();
+#else
+        abort();
+#endif
+    }
+    // By default, exceptions will abort the process, as per SFR's "panic"
+    // -based exception model (exceptions indicate a programming error or
+    // unrecoverable missing resource).   However, this behavior can be changed
+    // via the above environment variable.
+}
 }
 
 

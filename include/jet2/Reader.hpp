@@ -73,6 +73,9 @@ void Reader<T>::fill() {
 // Flush to the underlying socket/file descriptor
     assert(offset_ == len_);
     len_ = fd_->read(&buffer_.front(), buffer_.size());
+    if (len_ == 0) {
+        throw coro::SocketCloseException(); // No data read
+    }
     offset_ = 0;
 }
 

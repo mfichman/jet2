@@ -39,11 +39,19 @@ class Model : public Object {
 public:
     enum SyncMode { ALWAYS, ONCE, DISABLED };
     enum SyncFlags { CONSTRUCT, SYNC };
+    enum NetMode { OUTPUT, INPUT };
 
-    Attr<ModelId> id;
-    Attr<sfr::Vector> position;
+    Attr<ModelId> id = 0;
+    Attr<sfr::Vector> position; // FIXME: Move to subclass
     Attr<sfr::Quaternion> rotation;  
-    Attr<SyncMode> syncMode; 
+    Attr<SyncMode> syncMode = ALWAYS; 
+    Attr<NetMode> netMode = OUTPUT;
+
+    void wait() { event_.wait(); }
+    void notifyAll() { event_.notifyAll(); }
+
+private:
+    coro::Event event_; // FIXME: Move to subclass?
 };
 
 }
