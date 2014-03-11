@@ -60,6 +60,7 @@ public:
     Ptr<void> ptr() { return object_; }
 
 private:
+    void operator=(TableEntry const&) {}
     Ptr<void> object_;
     std::type_info const& type_;
 };

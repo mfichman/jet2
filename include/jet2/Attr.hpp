@@ -51,7 +51,6 @@ public:
     template <typename... Arg>
     Attr(Arg... arg) : value_(arg...) {}
 
-    Attr() {}
     Attr(T const& value) : value_(value) {} // Creates an attr w/ an initial val
     T const& operator=(T const& value) { value_ = value; return value; } 
     T const& operator()(T const& value) { return *this = value; }

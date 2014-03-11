@@ -80,7 +80,7 @@ T const ArrayConst<T>::operator()(int32_t key) const {
     int32_t const index = key < 0 ? this->value_.size() + key : key;
     if (index < 0) {
         return T();
-    } else if (index >= this->value_.size()) {
+    } else if (size_t(index) >= this->value_.size()) {
         return T(); 
     } else {
         return this->value_[index];
@@ -95,7 +95,7 @@ T const& Array<T>::operator()(int32_t key, T const& value) {
     if (index < 0) {
         assert(!"index is out-of-range");
     } else {
-        if (index >= this->value_.size()) {
+        if (size_t(index) >= this->value_.size()) {
             this->value_.resize(index+1);
         }
         this->value_[index] = value;

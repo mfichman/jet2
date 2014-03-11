@@ -70,11 +70,17 @@ Ptr<ModelTable> modelTable(Ptr<Table> db) {
     return mt;
 }
 
-void sendMessage(Ptr<Connection> conn, Ptr<Table> db, Ptr<Model> model) {
-// Send a single message for a single model.
+void sendMessage(Ptr<Connection> conn, Ptr<Model> model) {
+// Send a single message for a single model.  Ensure that if another coroutine
+// is currently sending a message, the call is blocked until the message is
+// atomically sent, to avoid interleaving messages non-atomically.
     if (model->id() == 0 || model->syncMode() == Model::DISABLED || model->netMode() == Model::INPUT) { 
         return;
     }
+    while (conn->state() == Connection::SENDING) {
+        conn->event.wait();
+    }
+    conn->state = Connection::SENDING;
     conn->out()->val(model->id());
     if (!conn->model(model->id())) {
         uint8_t const flags = jet2::Model::CONSTRUCT;
@@ -89,6 +95,8 @@ void sendMessage(Ptr<Connection> conn, Ptr<Table> db, Ptr<Model> model) {
     if (model->syncMode() == Model::ONCE) {
         model->syncMode = Model::DISABLED;
     }
+    conn->state = Connection::IDLE;
+    conn->event.notifyAll();
 }
 
 void sendMessages(Ptr<Connection> conn, Ptr<Table> db, Ptr<ModelTable> mt) {
@@ -98,7 +106,7 @@ void sendMessages(Ptr<Connection> conn, Ptr<Table> db, Ptr<ModelTable> mt) {
         } else if (auto db = entry.second.cast<Table>()) {
             sendMessages(conn, db, mt);
         } else if (auto model = entry.second.cast<Model>()) {
-            sendMessage(conn, db, entry.second.cast<Model>());
+            sendMessage(conn, entry.second.cast<Model>());
         } else {
             assert(!"not a model");
         }
@@ -114,9 +122,9 @@ void sendFrame(Ptr<Connection> conn, Ptr<Table> db) {
 
 void send(Ptr<Connection> conn, Ptr<Table> db) {
 // Synchronize one connection, by sending data for any dirty models.
-    while (true) {
+    for (;;) {
         sendFrame(conn, db);
-        coro::sleep(coro::Time::millisec(100));
+        coro::sleep(netTimestep);
     }
 }
 
@@ -126,7 +134,7 @@ void send(Ptr<Connection> conn) {
     send(conn, db);
 }
 
-void recvMessage(Ptr<Connection> conn, Ptr<Table> db) {
+void recvMessage(Ptr<Connection> conn, Ptr<ModelTable> mt) {
 // Receive one message from a connection.
     auto modelId = ModelId(0);
     conn->in()->val(modelId); 
@@ -134,8 +142,7 @@ void recvMessage(Ptr<Connection> conn, Ptr<Table> db) {
     auto flags = uint8_t(0);
     conn->in()->val(flags); 
 
-    auto models = modelTable(db); 
-    auto model = models->model(modelId);
+    auto model = mt->model(modelId);
     assert(model && "model not found");
     assert(model->netMode() == Model::INPUT && "received message for non-input model");
     // If is marked INPUT, then the socket shouldn't receive any messages for
@@ -144,13 +151,21 @@ void recvMessage(Ptr<Connection> conn, Ptr<Table> db) {
         model->construct(conn->in());
     }
     conn->in()->val(model);
+    model->tickId = jet2::tickId; // Note the tickId of this model @ message receive
     model->notifyAll();
 }
 
+void recvMessage(Ptr<Connection> conn, Ptr<Table> db) {
+    auto mt = modelTable(db);
+    recvMessage(conn, mt);
+}
+
+
 void recv(Ptr<Connection> conn, Ptr<Table> db) {
 // Receive a stream of messages from a connection
-    while (true) {
-        recvMessage(conn, db);
+    auto mt = modelTable(db);
+    for (;;) {
+        recvMessage(conn, mt);
     } 
 }
 

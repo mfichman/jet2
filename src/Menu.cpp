@@ -28,7 +28,7 @@
 
 namespace jet2 {
 
-Menu::Menu(const std::string& title, int titleSize) {
+Menu::Menu(const std::string& title, GLfloat titleSize) {
     dispatcher_.reset(new InputDispatcher);
     titleSize_ = titleSize;
 
@@ -41,18 +41,18 @@ Menu::Menu(const std::string& title, int titleSize) {
     auto ui = ui_->childIs<sfr::Ui>();
     ui->yIs(sfr::Coord(offset_, sfr::Coord::PIXELS, sfr::Coord::BEGIN));
     ui->xIs(sfr::Coord(0, sfr::Coord::PERCENT));
-    ui->heightIs(sfr::Span(titleSize_+verticalSpacing_*2, sfr::Span::PIXELS));
+    ui->heightIs(sfr::Span(titleSize_+verticalSpacing_*2.0f, sfr::Span::PIXELS));
 
     auto caps = title;
     std::transform(caps.begin(), caps.end(), caps.begin(), ::toupper);
 
-    auto font = format("fonts/%s.ttf#%d", fontName_.c_str(), titleSize_);
+    auto font = format("fonts/%s.ttf#%d", fontName_.c_str(), int(titleSize_));
     titleText_ = ui->childIs<sfr::Text>();
     titleText_->textIs(caps);
     titleText_->fontIs(assets->assetIs<sfr::Font>(font));
-    titleText_->colorIs(sfr::Color(1, .870, .361, 1));
+    titleText_->colorIs(sfr::Color(1.0f, .870f, .361f, 1.0f));
     titleText_->sizeIs(titleSize_);
-    offset_ += titleText_->size()+verticalSpacing_*2;
+    offset_ += GLfloat(titleText_->size()+verticalSpacing_*2);
 }
 
 Menu::~Menu() {
@@ -67,14 +67,14 @@ void Menu::optionIs(std::string const& str, MenuFunc func) {
     auto ui = ui_->childIs<sfr::Ui>();
     ui->yIs(sfr::Coord(offset_, sfr::Coord::PIXELS, sfr::Coord::BEGIN));
     ui->xIs(sfr::Coord(0, sfr::Coord::PERCENT));
-    ui->heightIs(sfr::Span(optionSize_+verticalSpacing_, sfr::Span::PIXELS));
+    ui->heightIs(sfr::Span(GLfloat(optionSize_+verticalSpacing_), sfr::Span::PIXELS));
 
     //auto font = format("fonts/%s.ttf#%d", fontName_.c_str(), optionSize_);
-    auto font = format("fonts/%s.ttf#%d", "NeuropolX", optionSize_);
+    auto font = format("fonts/%s.ttf#%d", "NeuropolX", int(optionSize_));
     auto text = ui->childIs<sfr::Text>();
     text->textIs(str);
     text->fontIs(assets->assetIs<sfr::Font>(font));
-    text->colorIs(sfr::Color(1, 1, 1, .6));
+    text->colorIs(sfr::Color(1.f, 1.f, 1.f, .6f));
     text->sizeIs(optionSize_);
     offset_ += text->size()+verticalSpacing_;
      
@@ -89,7 +89,7 @@ void Menu::select() {
     quit_ = false;
     while (!quit_) {
         ui_->xIs(sfr::Coord(1, sfr::Coord::PERCENT));
-        slide(ui_, sfr::GLvec2(.05, .25), coro::Time::sec(.15));
+        slide(ui_, sfr::GLvec2(.05f, .25f), coro::Time::sec(.15));
 
  
         auto mouse = sf::Mouse::getPosition(*jet2::window);
@@ -132,9 +132,9 @@ void Menu::mouseMoved(sf::Event const& evt) {
         auto ui = ui_->child<sfr::Ui>(i+1);
         auto text = ui->child<sfr::Text>(0);
         if (dispatcher_->ui() == ui) {
-            text->colorIs(sfr::Color(1, 1, 1, 1));
+            text->colorIs(sfr::Color(1.0f, 1.0f, 1.0f, 1.0f));
         } else {
-            text->colorIs(sfr::Color(1, 1, 1, .6));
+            text->colorIs(sfr::Color(1.0f, 1.0f, 1.0f, .6f));
         }
     }
 }

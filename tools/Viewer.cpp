@@ -20,6 +20,7 @@
  * IN THE SOFTWARE.
  */
 
+#include <jet2/Common.hpp>
 #include <jet2/jet2.hpp>
 
 using namespace sfr;
@@ -28,29 +29,29 @@ using namespace sfr;
 void update(Ptr<sfr::Transform> node) {
     auto root = jet2::scene->root();
 
-    auto radiansX = 0.;
-    auto radiansY = 0.;
+    auto radiansX = 0.0f;
+    auto radiansY = 0.0f;
     auto x = 0;
     auto y = 0;
 
     bool pressed = false;
-    while (true) {
+    for (;;) {
         if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
             auto mouse = sf::Mouse::getPosition(*jet2::window);
             if (!pressed) {
                 x = mouse.x;
                 y = mouse.y;
             }
-            radiansX += (float)(x-mouse.x)*jet2::timestep.sec(); 
-            radiansY += (float)(y-mouse.y)*jet2::timestep.sec(); 
+            radiansX += float((x-mouse.x)*jet2::timestep.sec()); 
+            radiansY += float((y-mouse.y)*jet2::timestep.sec());
             pressed = true;
             x = mouse.x;
             y = mouse.y;
         } else {
             pressed = false;
         }
-        auto rotateX = sfr::Matrix(sfr::Quaternion(sfr::Vector(0, 1, 0), radiansX), sfr::Vector(0, 0, 0));
-        auto rotateY = sfr::Matrix(sfr::Quaternion(sfr::Vector(0, 0, 1), radiansY), sfr::Vector(0, 0, 0));
+        auto rotateX = sfr::Matrix(sfr::Quaternion(sfr::Vector(0, 1.0f, 0), radiansX), sfr::Vector(0, 0, 0));
+        auto rotateY = sfr::Matrix(sfr::Quaternion(sfr::Vector(0, 0, 1.0f), radiansY), sfr::Vector(0, 0, 0));
         auto transform = rotateY * rotateX;// * look;
         //auto transform = rotateX * look;
         node->transformIs(transform);
@@ -90,7 +91,7 @@ int main(int argc, char** argv) {
     cameraNode->transformIs(sfr::Matrix::look(position, sfr::Vector(), up));
 
     auto camera = cameraNode->childIs<sfr::Camera>();
-    camera->nearIs(0.1);
+    camera->nearIs(0.1f);
     camera->farIs(1000);
     camera->viewportWidthIs(jet2::window->getSize().x);
     camera->viewportHeightIs(jet2::window->getSize().y);

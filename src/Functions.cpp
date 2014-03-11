@@ -101,8 +101,8 @@ void slide(Ptr<sfr::Ui> ui, sfr::GLvec2 end, coro::Time duration) {
         auto y = ui->y();
         auto dx = distx*clock.getElapsedTime().asSeconds()/duration.sec();
         auto dy = disty*clock.getElapsedTime().asSeconds()/duration.sec();
-        ui->xIs(sfr::Coord(startx+dx, x.unit(), x.basis()));
-        ui->yIs(sfr::Coord(starty+dy, y.unit(), y.basis()));
+        ui->xIs(sfr::Coord(GLfloat(startx+dx), x.unit(), x.basis()));
+        ui->yIs(sfr::Coord(GLfloat(starty+dy), y.unit(), y.basis()));
         jet2::render();
     }
     auto x = ui->x();

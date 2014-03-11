@@ -28,7 +28,10 @@ namespace jet2 {
 TableException::TableException(std::string const& message) {
     message_ = message;
     std::cerr << "error: " << message << std::endl;
+#pragma warning(push)
+#pragma warning(disable: 4996)
     if (!getenv("JET2_NO_DEBUG_EXCEPTIONS")) {
+#pragma warning(pop)
 #ifdef _WIN32
         __debugbreak();
 #else

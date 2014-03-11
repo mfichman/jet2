@@ -24,7 +24,6 @@
 
 #include "jet2/Common.hpp"
 #include "jet2/Object.hpp"
-#include "jet2/Functor.hpp"
 
 namespace jet2 {
 
@@ -32,7 +31,7 @@ typedef uint16_t ModelId;
 class ModelTable : public Object {
 public:
     Hash<ModelId, Ptr<Model>> model;
-    Attr<ModelId> nextId = 0;
+    Attr<ModelId> nextId = ModelId(0);
 };
 
 class Model : public Object {
@@ -41,11 +40,12 @@ public:
     enum SyncFlags { CONSTRUCT, SYNC };
     enum NetMode { OUTPUT, INPUT };
 
-    Attr<ModelId> id = 0;
+    Attr<ModelId> id = ModelId(0);
     Attr<sfr::Vector> position; // FIXME: Move to subclass
     Attr<sfr::Quaternion> rotation;  
     Attr<SyncMode> syncMode = ALWAYS; 
     Attr<NetMode> netMode = OUTPUT;
+    Attr<TickId> tickId = 0;
 
     void wait() { event_.wait(); }
     void notifyAll() { event_.notifyAll(); }

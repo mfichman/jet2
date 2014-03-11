@@ -30,8 +30,11 @@
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 //#define BT_USE_DOUBLE_PRECISION
+#pragma warning(push)
+#pragma warning(disable: 4127 4100)
 #include <bullet/btBulletCollisionCommon.h>
 #include <bullet/btBulletDynamicsCommon.h>
+#pragma warning(pop)
 #include <sfr/sfr.hpp>
 #include <fstream>
 #include <algorithm>
@@ -54,6 +57,7 @@
 
 
 namespace jet2 {
+class Client;
 class Code;
 class Connection;
 class Controller;
@@ -62,12 +66,17 @@ class Functor;
 class InputDispatcher;
 class Model;
 class Object;
+class Server;
 class Table;
 class Timer;
+
+typedef uint32_t TickId;
 
 template <typename T>
 using Ptr = std::shared_ptr<T>;
 
+template <typename T>
+using WeakPtr = std::weak_ptr<T>;
 }
 
 #endif

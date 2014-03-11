@@ -55,11 +55,16 @@ Ptr<coro::Event> const renderEvent(new coro::Event);
 
 Ptr<Table> const db = std::make_shared<Table>();
 coro::Time const timestep = coro::Time::sec(1./60.);
+coro::Time const netTimestep = coro::Time::millisec(100);
+coro::Time netDelta;
+TickId tickId = 0;
+TickId netTickId = 0;
 
 void tick(btDynamicsWorld* world, btScalar timestep) {
 // Run a single collision tick.  Clear forces, notify controllers of any
 // collisions, and then notify any coroutines that are waiting on the tick
 // callback event.
+    tickId++;
     world->clearForces();
 
     auto dispatcher = world->getDispatcher();
@@ -144,13 +149,13 @@ void init(KernelMode mode) {
 void task(void (*func)(sf::Time const&), uint64_t hz) {
 // Invokes task function 'func' once per the interval given by 'rate'
     auto clock = sf::Clock(); 
-    while (true) {
+    for (;;) {
         auto delta = clock.getElapsedTime();
         clock.restart();
         func(delta);
         if (hz) {
             auto used = clock.getElapsedTime();
-            auto interval = sf::seconds(1./(double)hz);
+            auto interval = sf::seconds(1.f/(float)hz);
             auto sleep = std::max(interval-used, sf::seconds(0));
             coro::sleep(coro::Time::microsec(sleep.asMicroseconds()));
         } else {
@@ -225,7 +230,7 @@ void physics(sf::Time const& delta) {
         std::cout << delta.asSeconds() << std::endl;
     }
 */
-    world->stepSimulation(delta.asSeconds(), 8, timestep.sec());
+    world->stepSimulation(btScalar(delta.asSeconds()), 8, btScalar(timestep.sec()));
     if (deferredRenderer) {
         updater->operator()(scene); 
     }

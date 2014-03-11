@@ -23,6 +23,7 @@
 #pragma once
 
 #include "jet2/Common.hpp"
+#include "jet2/Network.hpp"
 
 namespace jet2 {
 
@@ -66,14 +67,21 @@ extern Ptr<coro::Event> const inputEvent;
 extern Ptr<coro::Event> const renderEvent;
 extern std::vector<sf::Event> inputQueue; // FIXME
 extern coro::Time const timestep;
+extern coro::Time const netTimestep;
+extern coro::Time netDelta; // Approximate net flight time // FIXME 
+extern TickId tickId; // Tick ID (since start)
+extern TickId netTickId;
 
+// Networking
+Ptr<Server> server(Ptr<Table> db, size_t players);
+Ptr<Client> client(Ptr<Table> db, ClientId id);
 
 // Private
+void sendMessage(Ptr<Connection> conn, Ptr<Model> model);
 void sendFrame(Ptr<Connection> conn, Ptr<Table> db);
 void send(Ptr<Connection> conn, Ptr<Table> db);
 void send(Ptr<Connection> conn);
 void recvMessage(Ptr<Connection> conn, Ptr<Table> db);
-void recvFrame(Ptr<Connection> conn, Ptr<Table> db);
 void recv(Ptr<Connection> conn, Ptr<Table> db);
 void recv(Ptr<Connection> conn);
 

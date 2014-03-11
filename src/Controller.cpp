@@ -28,8 +28,8 @@
 namespace jet2 {
 
 Controller::Controller(Ptr<Model> model, Ptr<sfr::Transform> root) {
-    auto static defaultShape = std::make_shared<btBoxShape>(btVector3(.1, .1, .1));
-    mass_ = (root ? massFor(root) : .1);
+    auto static defaultShape = std::make_shared<btBoxShape>(btVector3(.1f, .1f, .1f));
+    mass_ = (root ? massFor(root) : .1f);
     model_ = model;
     if (root) {
         shape_ = shapeFor(root);

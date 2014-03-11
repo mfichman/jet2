@@ -20,8 +20,8 @@ void InputDispatcher::operator()(Ptr<sfr::World> world) {
     world_ = world;
     rect_.x = 0;
     rect_.y = 0;
-    rect_.width = world->camera()->viewportWidth();
-    rect_.height = world->camera()->viewportHeight();
+    rect_.width = GLfloat(world->camera()->viewportWidth());
+    rect_.height = GLfloat(world->camera()->viewportHeight());
     operator()(world->ui());
 }
 

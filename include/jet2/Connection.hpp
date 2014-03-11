@@ -33,8 +33,10 @@
 
 namespace jet2 {
 
+
 class Connection : public Object {
 public:
+    enum State { SENDING, IDLE };
     Connection(Ptr<coro::Socket> sd);
 
     AttrConst<Ptr<coro::Socket>> sd;
@@ -42,7 +44,9 @@ public:
     AttrConst<Ptr<Reader<coro::Socket>>> reader;
     AttrConst<Ptr<Functor>> out;
     AttrConst<Ptr<Functor>> in;
+    AttrConst<State> state = IDLE;
     Hash<ModelId, Ptr<Model>> model;
+    coro::Event event;
 };
 
 }

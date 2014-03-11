@@ -38,7 +38,10 @@ btScalar massFor(Ptr<sfr::Transform> transform, btScalar density=1.);
 template <typename ...Arg>
 std::string format(char const* format, Arg... arg) {
     char name[1024];
+#pragma warning(push)
+#pragma warning(disable: 4996)
     snprintf(name, sizeof(name), format, arg...);
+#pragma warning(pop)
     return std::string(name);
 }
 

@@ -31,15 +31,15 @@ typedef std::function<void()> MenuFunc;
 
 class Menu : public Object {
 public:
-    Menu(const std::string& title, int titleSize=86);
+    Menu(const std::string& title, GLfloat titleSize=86);
     ~Menu();
 
     void optionIs(std::string const& text, MenuFunc func); 
-    void optionSizeIs(int optionSize) { optionSize_ = optionSize; }
+    void optionSizeIs(GLfloat optionSize) { optionSize_ = optionSize; }
     void titleColorIs(sfr::Color const& color);
 
-    int titleSize() const { return titleSize_; }
-    int optionSize() const { return optionSize_; }
+    GLfloat titleSize() const { return titleSize_; }
+    GLfloat optionSize() const { return optionSize_; }
     Ptr<sfr::Ui> ui() const { return ui_; }
 
     // Blocks the current coroutine until a menu option is selected
@@ -55,14 +55,14 @@ private:
     Ptr<sfr::Text> titleText_;
     Ptr<InputDispatcher> dispatcher_;
     std::vector<MenuFunc> func_;
+    GLfloat offset_ = 0;
     int option_ = 0;
-    int offset_ = 0;
 
 
     bool quit_ = false;
-    int verticalSpacing_ = 15;
-    int optionSize_ = 32;
-    int titleSize_;
+    GLfloat verticalSpacing_ = 15.0f;
+    GLfloat optionSize_ = 32.0f;
+    GLfloat titleSize_;
     std::string fontName_ = "NeuropolXBold";
 };
 
