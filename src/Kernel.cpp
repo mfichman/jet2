@@ -183,6 +183,8 @@ void input(sf::Event const& evt) {
     case sf::Event::MouseButtonPressed: // Fallthrough
     case sf::Event::MouseWheelMoved: // Fallthrough
     case sf::Event::MouseMoved: // Fallthrough
+    case sf::Event::LostFocus: // Fallthrough
+    case sf::Event::GainedFocus: // Fallthrough
         inputQueue.push_back(evt);
         break;
     default: 

@@ -61,16 +61,21 @@ static void benchmark(Ptr<Connection> conn, Ptr<Table> db) {
 
     in->netMode = Model::INPUT;
     out->netMode = Model::OUTPUT;
-
-    for (;;) {
-        std::cout << "waiting" << std::endl; 
-        in->wait();
-        out->pingId = in->pingId();
-        out->syncMode = Model::ONCE;
-        sendMessage(conn, out);
-        conn->writer()->flush();
-        std::cout << "ping" << std::endl;
-    }
+	try {
+		for (;;) {
+			std::cout << "waiting" << std::endl;
+			in->wait();
+			out->pingId = in->pingId();
+			out->syncMode = Model::ONCE;
+			sendMessage(conn, out);
+			conn->writer()->flush();
+			std::cout << "ping" << std::endl;
+		}
+	} catch (coro::SocketCloseException const&) {
+	} catch (coro::ExitException const&) {
+		std::cerr << "exit" << std::endl;
+	}
+	std::cerr << "goodbye" << std::endl;
 }
 
 static void accept(Ptr<Server> server, Ptr<Connection> conn, Ptr<Table> db) {
