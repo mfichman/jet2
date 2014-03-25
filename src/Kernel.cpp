@@ -95,7 +95,10 @@ void initWindow() {
     assetLoader.reset(new sfr::AssetLoader(assets));
     updater.reset(new sfr::TransformUpdater);
 
-    sf::ContextSettings settings(32, 0, 0, 3, 2);
+    sf::ContextSettings settings(32);
+    settings.majorVersion = 3;
+    settings.minorVersion = 2;
+    settings.antialiasingLevel = 8;
     //sf::VideoMode mode(1920, 1200);
     //sf::VideoMode mode(1200, 800);
     //window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Fullscreen, settings);

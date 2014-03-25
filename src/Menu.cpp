@@ -50,7 +50,8 @@ Menu::Menu(const std::string& title, GLfloat titleSize) {
     titleText_ = ui->childIs<sfr::Text>();
     titleText_->textIs(caps);
     titleText_->fontIs(assets->assetIs<sfr::Font>(font));
-    titleText_->colorIs(sfr::Color(1.0f, .870f, .361f, 1.0f));
+    //titleText_->colorIs(sfr::Color(1.0f, .870f, .361f, 1.0f));
+    titleText_->colorIs(sfr::Color(1.0f, .8f, .3f, 1.0f));
     titleText_->sizeIs(titleSize_);
     offset_ += GLfloat(titleText_->size()+verticalSpacing_*2);
 }
@@ -74,7 +75,7 @@ void Menu::optionIs(std::string const& str, MenuFunc func) {
     auto text = ui->childIs<sfr::Text>();
     text->textIs(str);
     text->fontIs(assets->assetIs<sfr::Font>(font));
-    text->colorIs(sfr::Color(1.f, 1.f, 1.f, .6f));
+    text->colorIs(sfr::Color(1.f, 1.f, 1.f, .8f));
     text->sizeIs(optionSize_);
     offset_ += text->size()+verticalSpacing_;
      
@@ -134,7 +135,7 @@ void Menu::mouseMoved(sf::Event const& evt) {
         if (dispatcher_->ui() == ui) {
             text->colorIs(sfr::Color(1.0f, 1.0f, 1.0f, 1.0f));
         } else {
-            text->colorIs(sfr::Color(1.0f, 1.0f, 1.0f, .6f));
+            text->colorIs(sfr::Color(1.0f, 1.0f, 1.0f, .8f));
         }
     }
 }
