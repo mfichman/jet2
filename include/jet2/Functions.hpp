@@ -24,7 +24,9 @@
 
 #include "jet2/Common.hpp"
 
+#ifdef _WIN32
 #define snprintf _snprintf
+#endif
 
 namespace jet2 {
 
@@ -38,10 +40,14 @@ btScalar massFor(Ptr<sfr::Transform> transform, btScalar density=1.);
 template <typename ...Arg>
 std::string format(char const* format, Arg... arg) {
     char name[1024];
+#ifdef _WIN32
 #pragma warning(push)
 #pragma warning(disable: 4996)
+#endif
     snprintf(name, sizeof(name), format, arg...);
+#ifdef _WIN32
 #pragma warning(pop)
+#endif
     return std::string(name);
 }
 

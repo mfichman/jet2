@@ -30,7 +30,7 @@
 
 namespace jet2 {
 
-class View : private virtual TickListener, private virtual RenderListener, public Object {
+class View : public virtual TickListener, public virtual RenderListener, public Object {
 public:
     View(Ptr<Model> model);
     virtual ~View();

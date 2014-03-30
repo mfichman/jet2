@@ -30,11 +30,15 @@
 #include <SFML/Audio.hpp>
 #include <SFML/Graphics.hpp>
 //#define BT_USE_DOUBLE_PRECISION
+#ifdef _WIN32
 #pragma warning(push)
 #pragma warning(disable: 4127 4100)
+#endif
 #include <bullet/btBulletCollisionCommon.h>
 #include <bullet/btBulletDynamicsCommon.h>
+#ifdef _WIN32
 #pragma warning(pop)
+#endif
 #include <sfr/sfr.hpp>
 #include <fstream>
 #include <algorithm>
@@ -53,6 +57,10 @@
 
 #ifndef _WIN32
 #include <dlfcn.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
 #endif
 
 

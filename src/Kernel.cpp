@@ -98,7 +98,7 @@ void initWindow() {
     sf::ContextSettings settings(32);
     settings.majorVersion = 3;
     settings.minorVersion = 2;
-    settings.antialiasingLevel = 8;
+    //settings.antialiasingLevel = 0;
     //sf::VideoMode mode(1920, 1200);
     //sf::VideoMode mode(1200, 800);
     //window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Fullscreen, settings);
@@ -276,7 +276,8 @@ void input() {
 
 void run() {
     init();
-    auto cloop = coro::start(std::bind(task, loop, 120));
+    auto cloop = coro::start(std::bind(task, loop, 0));
+    // FixMe: Run continuously if vsync is enabled; otherwise, cap at 60hz!
     //coro::start(std::bind(task, sync, 60));
     // Run at 60 Hz for better response time
     coro::run();

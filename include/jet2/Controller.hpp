@@ -30,7 +30,7 @@
 
 namespace jet2 {
 
-class Controller : private virtual btMotionState, private virtual TickListener, public Object {
+class Controller : public virtual btMotionState, public virtual TickListener, public Object {
 public:
     Controller(Ptr<Model> model, Ptr<sfr::Transform> root);
     virtual ~Controller();
