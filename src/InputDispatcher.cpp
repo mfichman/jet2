@@ -10,13 +10,13 @@
 
 using namespace jet2;
 
-void InputDispatcher::input(sf::Event const& event, Ptr<sfr::World> world) {
+void InputDispatcher::input(sf::Event const& event, Ptr<sfr::Scene> world) {
     ui_ = 0;
     event_ = event;
     operator()(world);
 }
 
-void InputDispatcher::operator()(Ptr<sfr::World> world) {
+void InputDispatcher::operator()(Ptr<sfr::Scene> world) {
     world_ = world;
     rect_.x = 0;
     rect_.y = 0;

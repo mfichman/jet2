@@ -30,15 +30,15 @@ namespace jet2 {
 /* Renders user-interface components, rooted at a "Ui"-type node */
 class InputDispatcher : public sfr::Node::Functor {
 public:
-    void input(sf::Event const& event, Ptr<sfr::World> world);
-    void operator()(Ptr<sfr::World> world);
+    void input(sf::Event const& event, Ptr<sfr::Scene> world);
+    void operator()(Ptr<sfr::Scene> world);
     void operator()(Ptr<sfr::Ui> ui);
 
     Ptr<sfr::Ui> ui() const { return ui_; }
     // Return the UI component that the user clicked
 
 private:
-    Ptr<sfr::World> world_;
+    Ptr<sfr::Scene> world_;
     Ptr<sfr::Ui> ui_;
     sfr::Rect rect_;
     sf::Event event_;

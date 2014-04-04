@@ -11,6 +11,7 @@ class Jet2(pkgboot.Package):
         pkgboot.Lib('glew32s', 'win32'),
         pkgboot.Lib('opengl32', 'win32'),
         pkgboot.Lib('ws2_32', 'win32'),
+        pkgboot.Lib('user32', 'win32'),
         'sfml-audio',
         'sfml-graphics',
         'sfml-network',

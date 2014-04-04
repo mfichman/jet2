@@ -36,7 +36,7 @@ std::vector<sf::Event> inputQueue;
 Ptr<sf::Window> window;
 
 // Rendering
-Ptr<sfr::World> const scene(new sfr::World);
+Ptr<sfr::Scene> const scene(new sfr::Scene);
 Ptr<sfr::AssetTable> const assets(new sfr::AssetTable);
 Ptr<sfr::Interface> assetLoader;
 Ptr<sfr::TransformUpdater> updater;
@@ -103,9 +103,8 @@ void initWindow() {
     //sf::VideoMode mode(1200, 800);
     //window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Fullscreen, settings);
     //sf::VideoMode mode(1600, 1000);
-    //sf::VideoMode mode(800, 600);
     sf::VideoMode mode(1200, 800);
-    window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Default, settings);
+    window = std::make_shared<sf::Window>(mode, "Window", sf::Style::Close, settings);
     window->setVerticalSyncEnabled(true);
     //window->setMouseCursorVisible(false);
 

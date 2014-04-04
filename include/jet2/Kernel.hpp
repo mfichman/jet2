@@ -59,7 +59,7 @@ void renderListenerDel(RenderListener* listener);
 
 extern Ptr<Table> const db;
 extern Ptr<sfr::AssetTable> const assets;
-extern Ptr<sfr::World> const scene;
+extern Ptr<sfr::Scene> const scene;
 extern Ptr<btDiscreteDynamicsWorld> world;
 extern Ptr<sf::Window> window; // FIXME
 extern Ptr<coro::Event> const tickEvent;

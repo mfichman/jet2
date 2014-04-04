@@ -45,7 +45,6 @@ Controller::Controller(Ptr<Model> model, Ptr<sfr::Transform> root) {
     body_->setUserPointer(this);
     body_->setSleepingThresholds(0.03f, 0.01f);
     body_->setActivationState(DISABLE_DEACTIVATION);
-    world->addRigidBody(body_.get());
     tickListenerIs(this);
 }
 
