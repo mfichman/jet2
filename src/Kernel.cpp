@@ -91,11 +91,11 @@ void tick(btDynamicsWorld* world, btScalar timestep) {
 }
 
 void initWindow() {
-    // Initialize the renderers, asset loaders, etc.
-    assetLoader.reset(new sfr::AssetLoader(assets));
-    updater.reset(new sfr::TransformUpdater);
 
-    sf::ContextSettings settings(32);
+
+    sf::ContextSettings settings;
+	settings.depthBits = 24;
+	settings.stencilBits = 0;
     settings.majorVersion = 3;
     settings.minorVersion = 2;
     //settings.antialiasingLevel = 0;
@@ -122,6 +122,10 @@ void initWindow() {
     }
 #endif
     glViewport(0, 0, window->getSize().x, window->getSize().y);
+
+	// Initialize the renderers, asset loaders, etc.
+	assetLoader.reset(new sfr::AssetLoader(assets));
+	updater.reset(new sfr::TransformUpdater);
 
     boundsRenderer = std::make_shared<sfr::BoundsRenderer>(assets);
     deferredRenderer = std::make_shared<sfr::DeferredRenderer>(assets);
