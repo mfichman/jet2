@@ -65,7 +65,8 @@ int main(int argc, char** argv) {
 
     auto root = jet2::scene->root();
 
-    auto position = sfr::Vector(2.5, 2, 2.5);
+    //auto position = sfr::Vector(2.5, 2, 2.5);
+    auto position = sfr::Vector(8.5, 8, 8.5);
     auto up = sfr::Vector(0., 1., 0.);
 
     auto cameraNode = root->childIs<sfr::Transform>("camera");
