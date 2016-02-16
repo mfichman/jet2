@@ -31,6 +31,9 @@
 #include <SFML/Graphics.hpp>
 //#define BT_USE_DOUBLE_PRECISION
 #ifdef _WIN32
+#pragma warning (disable: 4459)
+#pragma warning (disable: 4457)
+
 #pragma warning(push)
 #pragma warning(disable: 4127 4100)
 #endif

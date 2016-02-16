@@ -29,31 +29,31 @@
 
 using namespace jet2;
 
-static void send(Ptr<Connection> conn, Ptr<Table> db) {
+static void send(Ptr<Connection> conn, Ptr<Table> table) {
 // Send game data continuously, once per timestep.  Also, periodically send a ping in concert with a
     try {
-        jet2::send(conn, db);
+        jet2::send(conn, table);
     } catch (coro::SocketCloseException const&){
         log("error: connection to server closed");
     }
 }
 
-static void recv(Ptr<Connection> conn, Ptr<Table> db) {
+static void recv(Ptr<Connection> conn, Ptr<Table> table) {
     try {
-        jet2::recv(conn, db);
+        jet2::recv(conn, table);
     } catch (coro::SocketCloseException const&){
         log("error: connection to server closed");
     }
 }
 
-static void benchmark(Ptr<Connection> conn, Ptr<Table> db) {
+static void benchmark(Ptr<Connection> conn, Ptr<Table> table) {
 // Collects performance info regarding the connection, for use in client-side
 // prediction.  In particular, this coroutine sends a ping, waits for a
 // response from the server, and uses that information to estimate the 1/2 RTT
 // value.  This value is used to extrapolate the position of objects given
 // their velocity, to achieve a better estimate of the position of each object.
-    auto in = db->objectIs<NetworkInfo>("remotes/netinfo");
-    auto out = db->objectIs<NetworkInfo>("input/netinfo");
+    auto in = table->objectIs<NetworkInfo>("remotes/netinfo");
+    auto out = table->objectIs<NetworkInfo>("input/netinfo");
 
     in->netMode = Model::INPUT; 
     out->netMode = Model::OUTPUT;
@@ -87,7 +87,7 @@ static void benchmark(Ptr<Connection> conn, Ptr<Table> db) {
     }
 }
 
-static void connect(Ptr<Client> client, Ptr<Table> db) {
+static void connect(Ptr<Client> client, Ptr<Table> table) {
 // Connect or reconnect client to the server
     auto sd = std::make_shared<coro::Socket>();
     auto serverDesc = std::make_shared<ServerDesc>();
@@ -105,11 +105,11 @@ static void connect(Ptr<Client> client, Ptr<Table> db) {
     conn->in()->val(serverDesc);
     assert(serverDesc->magic() == jet2::MAGIC);
 
-    auto remotes = db->objectIs<Table>("remotes");
-    auto input = db->objectIs<Table>("input");
+    auto remotes = table->objectIs<Table>("remotes");
+    auto input = table->objectIs<Table>("input");
 
     client->conn = conn;
-    client->benchmark = coro::start([=] { benchmark(conn, db); } );
+    client->benchmark = coro::start([=] { benchmark(conn, table); } );
     client->send = coro::start([=]{ ::send(conn, input); });
     client->recv = coro::start([=]{ ::recv(conn, remotes); });
 }
@@ -117,11 +117,11 @@ static void connect(Ptr<Client> client, Ptr<Table> db) {
 
 namespace jet2 {
 
-Ptr<Client> client(Ptr<Table> db, ClientId id) {
+Ptr<Client> client(Ptr<Table> table, ClientId id) {
 // Connect to server
     auto client = std::make_shared<Client>();
     client->id = id;
-    connect(client, db);
+    connect(client, table);
     return client;
 }
 

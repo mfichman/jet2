@@ -26,16 +26,29 @@
 using namespace sfr;
 
 
-void update(Ptr<sfr::Transform> node) {
+void update(Ptr<sfr::Transform> cameraNode, Ptr<sfr::Transform> node) {
     auto root = jet2::scene->root();
 
     auto radiansX = 0.0f;
     auto radiansY = 0.0f;
     auto x = 0;
     auto y = 0;
+    auto zoom = 8.f;
+    auto up = sfr::Vector(0., 1., 0.);
 
     bool pressed = false;
     for (;;) {
+        for (auto event : jet2::inputQueue) {
+            if (event.type == sf::Event::MouseWheelMoved) {
+                zoom += event.mouseWheel.delta * .1f;
+            } else if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::Add) {
+                    zoom -= 3.f;
+                } else if (event.key.code == sf::Keyboard::Subtract) {
+                    zoom += 3.f;
+                }
+            }
+        }
         if (sf::Mouse::isButtonPressed(sf::Mouse::Left)) {
             auto mouse = sf::Mouse::getPosition(*jet2::window);
             if (!pressed) {
@@ -56,6 +69,9 @@ void update(Ptr<sfr::Transform> node) {
         //auto transform = rotateX * look;
         node->transformIs(transform);
 
+        auto position = sfr::Vector(0, 0, zoom);
+        cameraNode->transformIs(sfr::Matrix::look(position, sfr::Vector(), up));
+
         jet2::tick();
     }
 }
@@ -66,7 +82,7 @@ int main(int argc, char** argv) {
     auto root = jet2::scene->root();
 
     //auto position = sfr::Vector(2.5, 2, 2.5);
-    auto position = sfr::Vector(8.5, 8, 8.5);
+    auto position = sfr::Vector(8, 8, 8);
     auto up = sfr::Vector(0., 1., 0.);
 
     auto cameraNode = root->childIs<sfr::Transform>("camera");
@@ -97,19 +113,21 @@ int main(int argc, char** argv) {
     hemi->constantAttenuationIs(1);
     hemi->linearAttenuationIs(0);
     hemi->quadraticAttenuationIs(0);
-    hemi->diffuseColorIs(sfr::Color(.5f, .5f, .5f, 1.f));
-    hemi->backDiffuseColorIs(sfr::Color(0.2f, 0.2f, 0.2f, 1.f));
+    hemi->diffuseColorIs(sfr::Color(1.f, 1.f, 1.f, 1.f));
+    hemi->backDiffuseColorIs(sfr::Color(0.8f, 0.8f, 0.8f, 1.f));
     hemi->specularColorIs(sfr::Color(1.f, 1., 1.f, 1.f));
-    hemi->directionIs(sfr::Vector(1.f, -1.f, 1.f));
+    hemi->directionIs(sfr::Vector(0.f, 0.f, -1.f));
 
     auto plane = root->childIs<sfr::Transform>("plane");
+/*
     plane->childIs(jet2::assets->assetIs<sfr::Transform>("meshes/Plane.obj"));
     plane->positionIs(sfr::Vector(0, -1, 0));
+*/
 
     auto asset = jet2::assets->assetIs<sfr::Transform>(argv[1]);
     root->childIs(asset);
 
-    auto input = coro::start(std::bind(update, asset));
+    auto input = coro::start(std::bind(update, cameraNode, asset));
 
     jet2::run();
     jet2::exit();

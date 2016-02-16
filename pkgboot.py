@@ -135,9 +135,9 @@ class Package:
         self.branch = os.popen('git rev-parse --abbrev-ref HEAD').read().strip()
         self.revision = os.popen('git rev-parse HEAD').read().strip()
         self.defines.update({
-            'VERSION': self.version,
-            'REVISION': self.revision,
-            'BRANCH': self.branch,
+            '%s_VERSION' % self.name.upper(): self.version,
+            '%s_REVISION' % self.name.upper(): self.revision,
+            '%s_BRANCH' % self.name.upper(): self.branch,
         })
         self.includes.extend([
             'include',
@@ -168,15 +168,15 @@ class Package:
         # Add MASM assembly files
 
         self.includes.extend([
-            'C:\\WinBrew\\include',
+            os.environ['LOCALAPPDATA']+'\\WinBrew\\include',
         ])
         self.lib_path.extend([
-            'C:\\WinBrew\\lib',
+            os.environ['LOCALAPPDATA']+'\\WinBrew\\lib',
         ])
         self.path.extend([
             os.environ['PATH'],
-            'C:\\WinBrew\\lib', 
-            'C:\\WinBrew\\bin', 
+            os.environ['LOCALAPPDATA']+'\\WinBrew\\bin',
+            os.environ['LOCALAPPDATA']+'\\WinBrew\\lib',
         ])
         # Extra Windows includes
 

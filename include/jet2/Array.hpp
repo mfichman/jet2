@@ -77,7 +77,7 @@ template <typename T>
 T const ArrayConst<T>::operator()(int32_t key) const { 
 // Returns the nth element in the collection, or the default T otherwise.  A
 // negative number returns the nth element from the end of the collection.
-    int32_t const index = key < 0 ? this->value_.size() + key : key;
+    int32_t const index = int32_t(key < 0 ? this->value_.size() + key : key);
     if (index < 0) {
         return T();
     } else if (size_t(index) >= this->value_.size()) {
@@ -91,7 +91,7 @@ template <typename T>
 T const& Array<T>::operator()(int32_t key, T const& value) {
 // Replaces the nth element in the collection.  A negative number replaces the
 // nth element from the end.
-    int32_t const index = key < 0 ? this->value_.size() + key : key;
+    int32_t const index = int32_t(key < 0 ? this->value_.size() + key : key);
     if (index < 0) {
         assert(!"index is out-of-range");
     } else {
@@ -118,7 +118,7 @@ template <typename T>
 void ArrayLive<T>::push(T const& value) {
 // Adds an element to the end of the array.
     Array<T>::push(value);
-    notify(this->value_.size()-1);
+    notify(int32_t(this->value_.size())-1);
 }
 
 template <typename T>
