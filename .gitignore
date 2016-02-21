@@ -1,5 +1,6 @@
 *.pyc
 *.pdb
+*.o
 readme.txt
 *.sdf
 *.suo
